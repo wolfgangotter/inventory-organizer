@@ -3,7 +3,7 @@ import { movePatch, planMove } from '../core/move';
 import { orderByRecent } from '../core/recent';
 import type { InventoryNote } from '../core/schema';
 import { ConfirmModal } from '../ui/confirm-modal';
-import { ContainerSuggestModal } from '../ui/container-suggest';
+import { ChoiceModal, noteChoices } from '../ui/choice-modal';
 import type InventoryOrganizerPlugin from '../main';
 
 /**
@@ -31,9 +31,9 @@ export function startMove(plugin: InventoryOrganizerPlugin, file: TFile): void {
 		return;
 	}
 
-	new ContainerSuggestModal(
+	new ChoiceModal(
 		plugin.app,
-		containers,
+		noteChoices(containers),
 		(target) => {
 			void completeMove(plugin, item, target);
 		},

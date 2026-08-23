@@ -1,4 +1,5 @@
 import { MarkdownView } from 'obsidian';
+import { startCreateContainer, startCreateInventory, startCreateItem } from './create';
 import { startMove } from './move';
 import { startValidate } from './validate';
 import type InventoryOrganizerPlugin from '../main';
@@ -34,6 +35,34 @@ export function registerCommands(plugin: InventoryOrganizerPlugin): void {
 			// exactly the thing you want to reach when you do not know which
 			// note is wrong.
 			startValidate(plugin, plugin.app.workspace.getActiveViewOfType(MarkdownView)?.file ?? null);
+		},
+	});
+
+	// Creation commands infer the inventory and, where obvious, the container -
+	// so the common case is a name and nothing else.
+	const activeFile = () => plugin.app.workspace.getActiveViewOfType(MarkdownView)?.file ?? null;
+
+	plugin.addCommand({
+		id: 'create-inventory',
+		name: 'Create inventory',
+		callback: () => {
+			startCreateInventory(plugin, activeFile());
+		},
+	});
+
+	plugin.addCommand({
+		id: 'create-container',
+		name: 'Create container',
+		callback: () => {
+			startCreateContainer(plugin, activeFile());
+		},
+	});
+
+	plugin.addCommand({
+		id: 'create-item',
+		name: 'Create item',
+		callback: () => {
+			startCreateItem(plugin, activeFile());
 		},
 	});
 }

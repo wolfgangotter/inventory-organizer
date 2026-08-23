@@ -177,6 +177,9 @@ src/
     move.ts                  plan a move → frontmatter patch + validation result
     validate.ts              integrity scan → typed findings
     naming.ts                unique, path-safe filename for a new note
+    create.ts                frontmatter + body for each new note kind
+    templates.ts             the Bases blocks; filters locked by P1-P3 and
+                             guarded by tests/templates.test.ts
     ids.ts                   uuid generation
     migrate.ts               legacy note → new-model patch (pure; testable on fixtures)
     errors.ts
@@ -186,9 +189,11 @@ src/
     note-factory.ts          create note from template, apply patch, open
     property-dom.ts          ⚠ internal DOM — the move button (ported from CIP)
   ui/
-    container-suggest.ts     FuzzySuggestModal over this inventory's containers
-    move-button.ts
-    report-modal.ts          validation + migration dry-run results
+    choice-modal.ts          one generic fuzzy picker for every "which note?"
+    name-prompt.ts           title input that refuses unusable names
+    confirm-modal.ts         gate for legal-but-unusual moves
+    move-button.ts           (phase 5)
+    report-modal.ts          validation results
   triggers/
     commands.ts
     file-menu.ts             single and multi-select "Move to container…"
@@ -213,7 +218,7 @@ may have properties set to Hidden).
 | **Move item to container…** | Fuzzy modal over containers in the item's inventory; shows folder as secondary text; most-recently-used first; "＋ New container…" as the last entry. Works on the active note, or on a file-explorer multi-selection. |
 | **Create item** | Invoked from a container note → `container` pre-filled. Invoked from an inventory note → container picker. Stamps `type`, `inventory`, `id`, default tags; creates in `item_folder`; opens the note. |
 | **Create container** | Same, minus `container`. |
-| **Create inventory** | Scaffolds root note (with the two base blocks), folders, and the item/container templates. One-time, but it is what makes the model reproducible. |
+| **Create inventory** | Scaffolds the root note with both overview bases, beside the note you were looking at, adopting that folder for its members. One-time, but it is what makes the model reproducible. |
 | **Validate inventory** | Report modal: dangling `container` links, items with no container, notes missing `type` or `inventory`, containers with no items, duplicate container names. Each finding is clickable. |
 | ~~**Migrate legacy inventory**~~ | **Descoped 2026-08-23** at the user's direction: the only vault holding legacy notes is the test vault, so a shipped migration command has no user. §6 records how it was done instead. |
 
@@ -280,10 +285,10 @@ must dry-run before it applies.
 | ~~**1**~~ | Repo scaffold, toolchain, pure `core/` with tests | **Done.** `npm run check` green, 87 tests |
 | ~~**2**~~ | Move command + container suggest modal | **Done.** No DOM coupling |
 | ~~**3**~~ | `validate` + report modal (migrate descoped) | **Done.** Test vault converted; validation runs clean |
-| **4** | Creation commands + inventory scaffolding | New inventory reproducible from nothing |
+| ~~**4**~~ | Creation commands + inventory scaffolding | **Done.** New inventory reproducible from nothing |
 | **5** | Property-row move button (internal DOM, optional) | Button works; disabling it changes nothing functionally |
 | **6** | File-menu bulk move, settings tab, README | Release checklist |
 
 Phases 2 and 3 are the ones that pay for the plugin. 5 is a convenience and can be cut.
 
-Remaining: **4** (creation commands), **5** (property-row button), **6** (bulk move, settings tab, README).
+Remaining: **5** (property-row button), **6** (bulk move, settings tab, README).

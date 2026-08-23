@@ -1,6 +1,7 @@
 import { Notice, Plugin } from 'obsidian';
 import { InventoryIndex } from './obsidian/inventory-index';
 import { FrontmatterWriter } from './obsidian/frontmatter-port';
+import { NoteFactory } from './obsidian/note-factory';
 import {
 	DEFAULT_SETTINGS,
 	MAX_RECENT_CONTAINERS,
@@ -14,12 +15,14 @@ export default class InventoryOrganizerPlugin extends Plugin {
 	settings: InventoryOrganizerSettings = DEFAULT_SETTINGS;
 	index!: InventoryIndex;
 	frontmatter!: FrontmatterWriter;
+	notes!: NoteFactory;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
 
 		this.index = new InventoryIndex(this.app, () => this.settings.propertyNames);
 		this.frontmatter = new FrontmatterWriter(this.app);
+		this.notes = new NoteFactory(this.app, this.frontmatter);
 
 		registerCommands(this);
 	}

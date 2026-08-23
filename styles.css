@@ -42,3 +42,10 @@
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 }
+
+/* Name prompt: inline validation message, hidden until it has something to say. */
+.io-prompt-error {
+	color: var(--text-error);
+	font-size: var(--font-ui-smaller);
+	margin-bottom: var(--size-4-2);
+}
