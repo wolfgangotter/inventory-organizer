@@ -7,3 +7,38 @@
 	color: var(--text-muted);
 	font-size: var(--font-ui-smaller);
 }
+
+/* Validation report: one clickable row per finding. */
+.io-report-group {
+	margin-bottom: var(--size-4-3);
+}
+
+.io-report-row {
+	padding: var(--size-4-2);
+	border-radius: var(--radius-s);
+	border-left: 3px solid var(--background-modifier-border);
+	margin-bottom: var(--size-4-1);
+	cursor: pointer;
+}
+
+.io-report-row:hover,
+.io-report-row:focus-visible {
+	background-color: var(--background-modifier-hover);
+}
+
+.io-report-error {
+	border-left-color: var(--text-error);
+}
+
+.io-report-warning {
+	border-left-color: var(--text-warning);
+}
+
+.io-report-note {
+	font-weight: var(--font-medium);
+}
+
+.io-report-message {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}

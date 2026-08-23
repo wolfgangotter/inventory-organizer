@@ -215,34 +215,36 @@ may have properties set to Hidden).
 | **Create container** | Same, minus `container`. |
 | **Create inventory** | Scaffolds root note (with the two base blocks), folders, and the item/container templates. One-time, but it is what makes the model reproducible. |
 | **Validate inventory** | Report modal: dangling `container` links, items with no container, notes missing `type` or `inventory`, containers with no items, duplicate container names. Each finding is clickable. |
-| **Migrate legacy inventory** | One-shot. §6. Dry-run first, always. |
+| ~~**Migrate legacy inventory**~~ | **Descoped 2026-08-23** at the user's direction: the only vault holding legacy notes is the test vault, so a shipped migration command has no user. §6 records how it was done instead. |
 
 The move command is registered before anything else — with it alone the plugin already solves the
 original complaint, and it is what should be dogfooded while the rest is built.
 
 ---
 
-## 6. Migration of the existing vault
+## 6. Converting the test vault (done, not shipped)
 
-30 notes in `test-vault/Inventory`, tagged `inventarek`. Pure transform in `core/migrate.ts`,
-tested against fixtures copied from the real notes.
+Migration was **descoped as a feature**. There is no production vault on the old
+uuid scheme, so a command to migrate one would have no user. The test vault was
+converted once, by a throwaway script, purely to give the commands realistic data.
 
-1. Build `uuid → TFile` from every note carrying `id`.
-2. **Container notes** (`tags` contains `container`): add `type: container`, add `inventory` link;
-   strip `container` / `item` / `inventarek` from `tags`; keep `id`.
-3. **Item notes**: resolve `container` uuid through the map → `"[[Name]]"` link (shortest unique
-   form via `metadataCache.fileToLinktext`); add `type: item` and `inventory`; strip structural tags;
-   keep `id`.
-4. **Unresolvable uuid** → leave the property untouched and report it. Never guess, never drop data.
-5. **Body `Container: [[X]]` line** → offer removal when it duplicates the property. Opt-in, off by
-   default; body text is the user's.
-6. **Base blocks** are regenerated from templates rather than patched, shown as a diff, and applied
-   only on confirmation. Rewriting arbitrary user YAML in place is not worth the risk.
+Applied 2026-08-23 to all 26 notes in `test-vault/Inventory`: 23 items, 2 containers,
+1 inventory root. Uuid `container` values resolved to wikilinks, `type` and
+`inventory` added, structural tags (`inventarek`, `item`, `container`) stripped,
+the duplicated `Container: [[...]]` body line removed, `id` preserved, and the
+embedded base blocks regenerated against the locked §2 filters.
 
-Dry-run produces a full report before a single file is written. All writes go through
-`processFrontMatter` — never hand-rolled YAML.
+Two things that bit, worth remembering if this is ever revisited:
 
----
+- **Obsidian rewrites `tags: [a, b]` into a block list** as soon as the property is
+  touched in the UI, so both forms coexist in one vault. A parser that handles only
+  the inline form silently skips notes rather than failing loudly.
+- A container had been renamed during the P1 probe, so the "wrong" link text in the
+  output was in fact correct. Verify against the current vault, not against memory
+  of it.
+
+A pre-conversion backup was taken first. Any future bulk write must do the same and
+must dry-run before it applies.
 
 ## 7. Risks
 
@@ -275,11 +277,13 @@ Dry-run produces a full report before a single file is written. All writes go th
 | Phase | Content | Exit criterion |
 |---|---|---|
 | ~~**0**~~ | Probes | **Done 2026-08-23.** P1–P3 closed favourably; §2 base templates locked |
-| **1** | Repo scaffold, toolchain, `core/schema` + `identify` + `move` with tests | `npm run check` green |
-| **2** | Move command + container suggest modal | Item moved end-to-end in the test vault, no DOM coupling |
-| **3** | `migrate` + `validate` + report modal | Test vault fully converted, validation clean |
+| ~~**1**~~ | Repo scaffold, toolchain, pure `core/` with tests | **Done.** `npm run check` green, 87 tests |
+| ~~**2**~~ | Move command + container suggest modal | **Done.** No DOM coupling |
+| ~~**3**~~ | `validate` + report modal (migrate descoped) | **Done.** Test vault converted; validation runs clean |
 | **4** | Creation commands + inventory scaffolding | New inventory reproducible from nothing |
 | **5** | Property-row move button (internal DOM, optional) | Button works; disabling it changes nothing functionally |
 | **6** | File-menu bulk move, settings tab, README | Release checklist |
 
 Phases 2 and 3 are the ones that pay for the plugin. 5 is a convenience and can be cut.
+
+Remaining: **4** (creation commands), **5** (property-row button), **6** (bulk move, settings tab, README).

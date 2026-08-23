@@ -97,6 +97,24 @@ export class InventoryIndex {
 		return scoped.length > 0 ? scoped : containers;
 	}
 
+	/** Every inventory root note in the vault. */
+	inventories(): InventoryNote[] {
+		return this.all()
+			.filter((note) => note.kind === 'inventory')
+			.sort((a, b) => a.ref.basename.localeCompare(b.ref.basename));
+	}
+
+	/**
+	 * The inventory a note belongs to.
+	 *
+	 * An inventory root belongs to itself, which is what lets the command work
+	 * from the overview note as well as from a member note.
+	 */
+	inventoryOf(note: InventoryNote): string | null {
+		if (note.kind === 'inventory') return note.ref.path;
+		return note.inventoryPath;
+	}
+
 	/** Config from an inventory root note, by path. */
 	configFor(inventoryPath: string): InventoryConfig {
 		const file = this.app.vault.getFileByPath(inventoryPath);

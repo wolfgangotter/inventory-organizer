@@ -1,5 +1,6 @@
 import { MarkdownView } from 'obsidian';
 import { startMove } from './move';
+import { startValidate } from './validate';
 import type InventoryOrganizerPlugin from '../main';
 
 /**
@@ -22,6 +23,17 @@ export function registerCommands(plugin: InventoryOrganizerPlugin): void {
 			if (plugin.index.noteFor(file).kind !== 'item') return false;
 			if (!checking) startMove(plugin, file);
 			return true;
+		},
+	});
+
+	plugin.addCommand({
+		id: 'validate-inventory',
+		name: 'Validate inventory',
+		callback: () => {
+			// Not gated on the active note: a vault-wide integrity check is
+			// exactly the thing you want to reach when you do not know which
+			// note is wrong.
+			startValidate(plugin, plugin.app.workspace.getActiveViewOfType(MarkdownView)?.file ?? null);
 		},
 	});
 }
