@@ -1,0 +1,9 @@
+/* Container picker rows: name on top, folder underneath for disambiguation. */
+.io-suggest-title {
+	font-weight: var(--font-medium);
+}
+
+.io-suggest-path {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
