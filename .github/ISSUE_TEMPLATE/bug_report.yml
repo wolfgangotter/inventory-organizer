@@ -1,0 +1,117 @@
+name: Bug report
+description: Something does not work as described
+labels: ['bug']
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thanks for reporting. This plugin edits your notes' frontmatter, so
+              the most useful thing you can give us is the **before and after** of
+              the properties on the affected note. The questions below are the ones
+              that actually narrow a problem down.
+
+    - type: textarea
+      id: what-happened
+      attributes:
+          label: What happened
+          description: What did you expect, and what happened instead?
+          placeholder: |
+              I expected the item to move into "Chain Box".
+              Instead the `container` property was left unchanged.
+      validations:
+          required: true
+
+    - type: textarea
+      id: frontmatter
+      attributes:
+          label: Frontmatter of the affected note
+          description: |
+              The properties of the item or container involved, before and after if
+              you have both. Redact anything private.
+          render: yaml
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: Steps to reproduce
+          description: Exact steps, starting from a note you could recreate.
+          placeholder: |
+              1. Open an item note with a `container` property
+              2. Run "Move item to container"
+              3. Pick a container from the list
+      validations:
+          required: true
+
+    - type: dropdown
+      id: platform
+      attributes:
+          label: Platform
+          options:
+              - Desktop — Windows
+              - Desktop — macOS
+              - Desktop — Linux
+              - Mobile — iOS / iPadOS
+              - Mobile — Android
+      validations:
+          required: true
+
+    - type: dropdown
+      id: trigger
+      attributes:
+          label: How did you start it?
+          description: These paths are separate code, so this narrows it a lot.
+          options:
+              - The command palette
+              - The button on the container property row
+              - Right-click in the file explorer (one note)
+              - Right-click in the file explorer (several notes)
+              - Not applicable
+      validations:
+          required: true
+
+    - type: input
+      id: versions
+      attributes:
+          label: Obsidian and plugin version
+          description: Obsidian version is under Settings → About.
+          placeholder: 'Obsidian 1.13.1, Inventory Organizer 1.0.0'
+      validations:
+          required: true
+
+    - type: textarea
+      id: console
+      attributes:
+          label: Console output
+          description: |
+              On desktop: Ctrl/Cmd+Shift+I → Console. Anything starting with
+              `[inventory-organizer]` is especially useful. Leave blank on mobile,
+              where the console is not reachable.
+          render: text
+
+    - type: textarea
+      id: validation
+      attributes:
+          label: Output of "Validate inventory"
+          description: |
+              Run the command on the affected inventory and paste what it reports.
+              This often identifies the problem on its own.
+
+    - type: textarea
+      id: settings
+      attributes:
+          label: Relevant settings
+          description: |
+              Any renamed properties, and whether the container property button is
+              switched on.
+
+    - type: checkboxes
+      id: checks
+      attributes:
+          label: Before submitting
+          options:
+              - label: I am on the latest version of the plugin
+                required: true
+              - label: I checked that no existing issue reports this
+                required: true
