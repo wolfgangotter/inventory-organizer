@@ -2,11 +2,13 @@ import { Notice, Plugin } from 'obsidian';
 import { InventoryIndex } from './obsidian/inventory-index';
 import { FrontmatterWriter } from './obsidian/frontmatter-port';
 import { NoteFactory } from './obsidian/note-factory';
+import { PropertyDomAdapter } from './obsidian/property-dom';
 import {
 	DEFAULT_SETTINGS,
 	MAX_RECENT_CONTAINERS,
 	type InventoryOrganizerSettings,
 } from './settings/schema';
+import { InventoryOrganizerSettingTab } from './settings/tab';
 import { validateSettings } from './settings/validate';
 import { withRecent } from './core/recent';
 import { registerCommands } from './triggers/commands';
@@ -16,6 +18,7 @@ export default class InventoryOrganizerPlugin extends Plugin {
 	index!: InventoryIndex;
 	frontmatter!: FrontmatterWriter;
 	notes!: NoteFactory;
+	private propertyDom!: PropertyDomAdapter;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -24,7 +27,12 @@ export default class InventoryOrganizerPlugin extends Plugin {
 		this.frontmatter = new FrontmatterWriter(this.app);
 		this.notes = new NoteFactory(this.app, this.frontmatter);
 
+		// Reads Obsidian's internal property DOM and degrades to a no-op if it
+		// changes. The commands touch none of this.
+		this.propertyDom = this.addChild(new PropertyDomAdapter(this));
+
 		registerCommands(this);
+		this.addSettingTab(new InventoryOrganizerSettingTab(this.app, this));
 	}
 
 	/**
@@ -47,6 +55,12 @@ export default class InventoryOrganizerPlugin extends Plugin {
 
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
+		this.refreshPropertyRows();
+	}
+
+	/** Re-syncs the property-row button with the current settings. */
+	refreshPropertyRows(): void {
+		this.propertyDom.refresh();
 	}
 
 	/** Keeps the most-used containers at the top of the picker. */

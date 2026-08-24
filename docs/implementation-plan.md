@@ -192,7 +192,7 @@ src/
     choice-modal.ts          one generic fuzzy picker for every "which note?"
     name-prompt.ts           title input that refuses unusable names
     confirm-modal.ts         gate for legal-but-unusual moves
-    move-button.ts           (phase 5)
+    move-button.ts           the property-row affordance
     report-modal.ts          validation results
   triggers/
     commands.ts
@@ -255,7 +255,7 @@ must dry-run before it applies.
 
 | Risk | Mitigation |
 |---|---|
-| No public properties API (F1) — the move button is internal-DOM-coupled | One quarantined adapter, feature-detected, degrades to "no button". Every command works without it. |
+| No public properties API (F1) — the move button is internal-DOM-coupled | One quarantined adapter (`obsidian/property-dom.ts`), degrades to "no button", warns once in the console, and is switchable off in settings. Every command works without it. |
 | Bases filter syntax shifts between releases | Base YAML lives in `templates/`, not in code. Fixing it is a text edit, and existing notes are unaffected. |
 | ~~P1 / P2 fail~~ | Both closed favourably 2026-08-23. Links survive rename; link groupBy renders the name. |
 | ~~P3: Link equality turns out to be textual~~ | Closed — equality resolves targets. `container.asFile().path == this.file.path` remains a verified fallback if the semantics ever change. |
@@ -286,9 +286,9 @@ must dry-run before it applies.
 | ~~**2**~~ | Move command + container suggest modal | **Done.** No DOM coupling |
 | ~~**3**~~ | `validate` + report modal (migrate descoped) | **Done.** Test vault converted; validation runs clean |
 | ~~**4**~~ | Creation commands + inventory scaffolding | **Done.** New inventory reproducible from nothing |
-| **5** | Property-row move button (internal DOM, optional) | Button works; disabling it changes nothing functionally |
+| ~~**5**~~ | Property-row move button (internal DOM, optional) | **Done.** Button works; the toggle removes it with no functional loss |
 | **6** | File-menu bulk move, settings tab, README | Release checklist |
 
 Phases 2 and 3 are the ones that pay for the plugin. 5 is a convenience and can be cut.
 
-Remaining: **5** (property-row button), **6** (bulk move, settings tab, README).
+Remaining: **6** (bulk move from a file-explorer multi-selection, README, release prep).

@@ -18,7 +18,7 @@ export function resolveInventory(
 	const inventories = plugin.index.inventories();
 
 	if (inventories.length === 0) {
-		new Notice('No inventory found. Run "Create inventory" first.');
+		new Notice('No inventory found. Create one first.');
 		return;
 	}
 

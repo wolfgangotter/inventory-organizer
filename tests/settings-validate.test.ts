@@ -40,6 +40,11 @@ describe('validateSettings', () => {
 		);
 	});
 
+	it('reads the property-button toggle', () => {
+		expect(validateSettings({ showPropertyButton: false }).showPropertyButton).toBe(false);
+		expect(validateSettings({ showPropertyButton: 'yes' }).showPropertyButton).toBe(true);
+	});
+
 	it('reads the cross-inventory toggle', () => {
 		expect(validateSettings({ warnCrossInventory: false }).warnCrossInventory).toBe(false);
 		expect(validateSettings({ warnCrossInventory: 'no' }).warnCrossInventory).toBe(true);

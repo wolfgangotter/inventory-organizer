@@ -89,3 +89,15 @@ export function movePatch(names: PropertyNames, containerLinktext: string): Fron
 	patch.set[names.container] = linkValue(containerLinktext);
 	return patch;
 }
+
+/**
+ * Removing an item from its container without putting it anywhere.
+ *
+ * The property is deleted rather than blanked: validation reads a missing key
+ * as "unplaced", where an empty value looks like a link that failed to resolve.
+ */
+export function clearContainerPatch(names: PropertyNames): FrontmatterPatch {
+	const patch = emptyPatch();
+	patch.set[names.container] = null;
+	return patch;
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { movePatch, planMove } from '../src/core/move';
+import { clearContainerPatch, movePatch, planMove } from '../src/core/move';
 import { DEFAULT_PROPERTY_NAMES } from '../src/core/schema';
 import { container, item, note } from './helpers';
 
@@ -104,5 +104,19 @@ describe('movePatch', () => {
 		// Obsidian decides the form; this module must not second-guess it.
 		const patch = movePatch(DEFAULT_PROPERTY_NAMES, 'Inventory/Bike/Chain Box');
 		expect(patch.set.container).toBe('[[Inventory/Bike/Chain Box]]');
+	});
+});
+
+describe('clearContainerPatch', () => {
+	it('deletes the property rather than blanking it', () => {
+		// Validation reads a missing key as "unplaced"; an empty value would look
+		// like a link that failed to resolve.
+		expect(clearContainerPatch(DEFAULT_PROPERTY_NAMES).set).toEqual({ container: null });
+	});
+
+	it('honours a renamed container property', () => {
+		expect(clearContainerPatch({ ...DEFAULT_PROPERTY_NAMES, container: 'box' }).set).toEqual({
+			box: null,
+		});
 	});
 });

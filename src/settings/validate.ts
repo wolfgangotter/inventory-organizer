@@ -19,6 +19,10 @@ export function validateSettings(stored: unknown): InventoryOrganizerSettings {
 		warnCrossInventory: typeof raw.warnCrossInventory === 'boolean'
 			? raw.warnCrossInventory
 			: DEFAULT_SETTINGS.warnCrossInventory,
+		showPropertyButton:
+			typeof raw.showPropertyButton === 'boolean'
+				? raw.showPropertyButton
+				: DEFAULT_SETTINGS.showPropertyButton,
 		recentContainers: validateRecent(raw.recentContainers),
 	};
 }
