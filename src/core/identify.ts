@@ -1,3 +1,4 @@
+import { readPropertyDefaults } from './property-defaults';
 import {
 	INVENTORY_CONFIG_KEYS,
 	isNoteKind,
@@ -29,14 +30,25 @@ export function isBlank(value: unknown): boolean {
 	return Array.isArray(value) && value.length === 0;
 }
 
-/** Reads the per-inventory configuration out of an inventory root note. */
+/**
+ * Reads the per-inventory configuration out of an inventory root note.
+ *
+ * @param names  needed only by the property defaults, which refuse to redeclare
+ *               a reserved property under whatever name it is configured with.
+ */
 export function readInventoryConfig(
 	frontmatter: Record<string, unknown> | undefined,
+	names: PropertyNames,
 ): InventoryConfig {
 	return {
 		itemFolder: readFolder(frontmatter?.[INVENTORY_CONFIG_KEYS.itemFolder]),
 		containerFolder: readFolder(frontmatter?.[INVENTORY_CONFIG_KEYS.containerFolder]),
 		defaultTags: readTags(frontmatter?.[INVENTORY_CONFIG_KEYS.defaultTags]),
+		itemDefaults: readPropertyDefaults(frontmatter?.[INVENTORY_CONFIG_KEYS.itemDefaults], names),
+		containerDefaults: readPropertyDefaults(
+			frontmatter?.[INVENTORY_CONFIG_KEYS.containerDefaults],
+			names,
+		),
 	};
 }
 

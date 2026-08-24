@@ -2,7 +2,7 @@ import { Notice, TFile } from 'obsidian';
 import { newContainer, newInventory, newItem } from '../core/create';
 import { newId } from '../core/ids';
 import { orderByRecent } from '../core/recent';
-import type { InventoryNote } from '../core/schema';
+import type { InventoryConfig, InventoryNote } from '../core/schema';
 import { ChoiceModal, noteChoices, type Choice } from '../ui/choice-modal';
 import { NamePromptModal } from '../ui/name-prompt';
 import { resolveInventory } from './context';
@@ -27,7 +27,11 @@ export function startCreateInventory(plugin: InventoryOrganizerPlugin, active: T
 		placeholder: 'Bike Workshop',
 		onSubmit: (name) => {
 			void create(plugin, folder, name, () =>
-				newInventory({ tags: [], itemFolder: folder, containerFolder: folder }),
+				newInventory(plugin.settings.propertyNames, {
+					tags: [],
+					itemFolder: folder,
+					containerFolder: folder,
+				}),
 			).then((file) => {
 				if (file) {
 					new Notice('Inventory created. Add tags to `default_tags` to stamp them on new notes.');
@@ -51,6 +55,7 @@ export function startCreateContainer(plugin: InventoryOrganizerPlugin, active: T
 						inventoryLinktext: linktext(plugin, inventory, path),
 						tags: config.defaultTags,
 						id: newId(),
+						defaults: config.containerDefaults,
 					}),
 				);
 			},
@@ -76,11 +81,11 @@ export function startCreateItem(plugin: InventoryOrganizerPlugin, active: TFile 
 			placeholder: 'Chain Quick Link',
 			onSubmit: (name) => {
 				if (fromActive) {
-					void createItemIn(plugin, inventory, fromActive, folder, name, config.defaultTags);
+					void createItemIn(plugin, inventory, fromActive, folder, name, config);
 					return;
 				}
 				pickContainer(plugin, inventory, (container) => {
-					void createItemIn(plugin, inventory, container, folder, name, config.defaultTags);
+					void createItemIn(plugin, inventory, container, folder, name, config);
 				});
 			},
 		}).open();
@@ -124,14 +129,15 @@ async function createItemIn(
 	container: InventoryNote | null,
 	folder: string | null,
 	name: string,
-	tags: string[],
+	config: InventoryConfig,
 ): Promise<void> {
 	const file = await create(plugin, folder, name, (path) =>
 		newItem(plugin.settings.propertyNames, {
 			inventoryLinktext: linktext(plugin, inventory, path),
 			containerLinktext: container ? linktext(plugin, container, path) : null,
-			tags,
+			tags: config.defaultTags,
 			id: newId(),
+			defaults: config.itemDefaults,
 		}),
 	);
 	if (file && container) await plugin.rememberContainer(container.ref.path);

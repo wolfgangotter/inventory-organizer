@@ -36,7 +36,23 @@ export interface PropertyNames {
 	id: string;
 	quantity: string;
 	restock: string;
+	/** Wide header image, on inventory roots and containers. Bound by the Bases views. */
+	banner: string;
+	/** Card image, on items. Bound by the Bases views. */
+	cover: string;
 }
+
+/**
+ * The properties the model is built on, which a per-inventory declaration may
+ * never redeclare - see `core/property-defaults`. Everything else, including
+ * `quantity`, `banner` and `cover`, is an ordinary value the user may seed.
+ */
+export const RESERVED_PROPERTY_KEYS: readonly (keyof PropertyNames)[] = [
+	'type',
+	'inventory',
+	'container',
+	'id',
+];
 
 export const DEFAULT_PROPERTY_NAMES: PropertyNames = {
 	type: 'type',
@@ -45,7 +61,23 @@ export const DEFAULT_PROPERTY_NAMES: PropertyNames = {
 	id: 'id',
 	quantity: 'quantity',
 	restock: 'restock',
+	banner: 'banner',
+	cover: 'cover',
 };
+
+/**
+ * What a user-declared default property is allowed to hold.
+ *
+ * Scalars, an explicit blank, and flat lists of scalars - the shapes Obsidian's
+ * property editor can render and round-trip. Nested structures are refused by
+ * `core/property-defaults`, because a value the properties UI cannot edit is a
+ * value the user has no way to fix.
+ */
+export type PropertyScalar = string | number | boolean | null;
+export type PropertyValue = PropertyScalar | PropertyScalar[];
+
+/** Extra properties one inventory stamps onto the notes it creates. */
+export type PropertyDefaults = Record<string, PropertyValue>;
 
 /**
  * Per-inventory configuration, read from the inventory root note's own
@@ -56,12 +88,18 @@ export interface InventoryConfig {
 	itemFolder: string | null;
 	containerFolder: string | null;
 	defaultTags: string[];
+	/** Extra frontmatter this inventory stamps onto the items it creates. */
+	itemDefaults: PropertyDefaults;
+	/** Extra frontmatter this inventory stamps onto the containers it creates. */
+	containerDefaults: PropertyDefaults;
 }
 
 export const INVENTORY_CONFIG_KEYS = {
 	itemFolder: 'item_folder',
 	containerFolder: 'container_folder',
 	defaultTags: 'default_tags',
+	itemDefaults: 'item_defaults',
+	containerDefaults: 'container_defaults',
 } as const;
 
 /** A file, reduced to what the pure core is allowed to know about it. */

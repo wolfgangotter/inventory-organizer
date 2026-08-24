@@ -79,10 +79,22 @@ tags: [bike, workshop]
 with the vault and survives sync:
 ```yaml
 type: inventory
+banner: "[[Bike Workshop_banner.jpg]]"
 item_folder: Inventory/Bike Workshop
 container_folder: Inventory/Bike Workshop
 default_tags: [bike, workshop]      # stamped onto notes this inventory creates
+item_defaults:                      # extra properties, declared per inventory
+  condition: new
+  purchased:
+container_defaults:
+  location: shelf
 ```
+
+`item_defaults` / `container_defaults` are how the model stays open without a
+management UI: the root note declares whatever fields this inventory needs, and
+`core/property-defaults` checks them (scalars and flat lists only, capped, and
+`type` / `inventory` / `container` / `id` refused) before `core/create` merges
+them between the plugin's seeds and its computed structural properties.
 
 Containers are **flat** — a container has no `container` property. The model stays additive: adding
 nesting later means adding `container` to container notes plus cycle detection, with no schema break
