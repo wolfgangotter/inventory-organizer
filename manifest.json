@@ -1,7 +1,7 @@
 {
 	"id": "inventory-organizer",
 	"name": "Inventory Organizer",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"minAppVersion": "1.13.0",
 	"description": "Move items between containers and scaffold inventory notes, using plain frontmatter links and native Bases.",
 	"author": "Wolfgang Otter",

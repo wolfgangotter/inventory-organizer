@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-inventory-organizer",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "Move items between containers and scaffold inventory notes, using plain frontmatter links and native Bases.",
 	"main": "main.js",
 	"type": "module",
