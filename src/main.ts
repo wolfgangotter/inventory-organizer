@@ -3,11 +3,7 @@ import { InventoryIndex } from './obsidian/inventory-index';
 import { FrontmatterWriter } from './obsidian/frontmatter-port';
 import { NoteFactory } from './obsidian/note-factory';
 import { PropertyDomAdapter } from './obsidian/property-dom';
-import {
-	DEFAULT_SETTINGS,
-	MAX_RECENT_CONTAINERS,
-	type InventoryOrganizerSettings,
-} from './settings/schema';
+import { DEFAULT_SETTINGS, MAX_RECENT_CONTAINERS, type InventoryOrganizerSettings } from './settings/schema';
 import { InventoryOrganizerSettingTab } from './settings/tab';
 import { validateSettings } from './settings/validate';
 import { withRecent } from './core/recent';

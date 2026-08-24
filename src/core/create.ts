@@ -1,11 +1,7 @@
 import { linkValue } from './link-format';
 import { mergeFrontmatter } from './property-defaults';
 import { containerBase, inventoryBody } from './templates';
-import {
-	INVENTORY_CONFIG_KEYS,
-	type PropertyDefaults,
-	type PropertyNames,
-} from './schema';
+import { INVENTORY_CONFIG_KEYS, type PropertyDefaults, type PropertyNames } from './schema';
 
 /**
  * What a new note contains, before it touches the vault.

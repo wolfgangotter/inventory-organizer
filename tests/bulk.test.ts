@@ -59,10 +59,7 @@ describe('planBulkMove', () => {
 	});
 
 	it('treats a dangling container as movable, not skipped', () => {
-		const plan = planBulkMove(
-			[item('Inv/A.md', { inventoryPath: INV, containerDangling: true })],
-			BOX,
-		);
+		const plan = planBulkMove([item('Inv/A.md', { inventoryPath: INV, containerDangling: true })], BOX);
 		expect(paths(plan.movable)).toEqual(['Inv/A.md']);
 	});
 

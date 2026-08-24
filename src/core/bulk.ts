@@ -54,9 +54,7 @@ export function planBulkMove(candidates: readonly InventoryNote[], target: Inven
 export function commonInventory(items: readonly InventoryNote[]): string | null {
 	const first = items[0];
 	if (!first || first.inventoryPath === null) return null;
-	return items.every((item) => item.inventoryPath === first.inventoryPath)
-		? first.inventoryPath
-		: null;
+	return items.every((item) => item.inventoryPath === first.inventoryPath) ? first.inventoryPath : null;
 }
 
 /**

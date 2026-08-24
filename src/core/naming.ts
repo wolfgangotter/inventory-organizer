@@ -72,10 +72,7 @@ export function sanitizeFileName(raw: string): string | null {
 
 	// Leading dots hide the file; a name of "." or ".." is a path segment, not
 	// a name. Strip them entirely rather than trying to be clever.
-	name = name
-		.replace(/^\.+/, '')
-		.replace(/\.+$/, '')
-		.trim();
+	name = name.replace(/^\.+/, '').replace(/\.+$/, '').trim();
 
 	if (!name) return null;
 	if (RESERVED.has(name.toLowerCase())) return null;
@@ -86,10 +83,7 @@ export function sanitizeFileName(raw: string): string | null {
 
 /** Joins a folder and file name into a vault-relative path. */
 export function joinPath(folder: string | null, fileName: string): string {
-	const clean = (folder ?? '')
-		.replace(/^\/+/, '')
-		.replace(/\/+$/, '')
-		.trim();
+	const clean = (folder ?? '').replace(/^\/+/, '').replace(/\/+$/, '').trim();
 	return clean ? `${clean}/${fileName}.md` : `${fileName}.md`;
 }
 

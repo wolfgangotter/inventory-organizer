@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	MAX_PROPERTY_DEFAULTS,
-	mergeFrontmatter,
-	readPropertyDefaults,
-} from '../src/core/property-defaults';
+import { MAX_PROPERTY_DEFAULTS, mergeFrontmatter, readPropertyDefaults } from '../src/core/property-defaults';
 import { DEFAULT_PROPERTY_NAMES } from '../src/core/schema';
 
 const names = DEFAULT_PROPERTY_NAMES;
@@ -73,9 +69,11 @@ describe('readPropertyDefaults', () => {
 
 		it('still allows the overridable seeds', () => {
 			// quantity, restock, banner and cover are user values, not structure.
-			expect(
-				readPropertyDefaults({ quantity: 0, restock: true, cover: '[[c.png]]' }, names),
-			).toEqual({ quantity: 0, restock: true, cover: '[[c.png]]' });
+			expect(readPropertyDefaults({ quantity: 0, restock: true, cover: '[[c.png]]' }, names)).toEqual({
+				quantity: 0,
+				restock: true,
+				cover: '[[c.png]]',
+			});
 		});
 	});
 
@@ -96,9 +94,7 @@ describe('readPropertyDefaults', () => {
 		it('caps the number of properties', () => {
 			const declared: Record<string, unknown> = {};
 			for (let i = 0; i < MAX_PROPERTY_DEFAULTS + 10; i++) declared[`p${i}`] = i;
-			expect(Object.keys(readPropertyDefaults(declared, names))).toHaveLength(
-				MAX_PROPERTY_DEFAULTS,
-			);
+			expect(Object.keys(readPropertyDefaults(declared, names))).toHaveLength(MAX_PROPERTY_DEFAULTS);
 		});
 
 		it('caps list length and string length', () => {

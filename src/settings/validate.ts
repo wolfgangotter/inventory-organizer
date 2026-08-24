@@ -1,9 +1,5 @@
 import { DEFAULT_PROPERTY_NAMES, type PropertyNames } from '../core/schema';
-import {
-	DEFAULT_SETTINGS,
-	MAX_RECENT_CONTAINERS,
-	type InventoryOrganizerSettings,
-} from './schema';
+import { DEFAULT_SETTINGS, MAX_RECENT_CONTAINERS, type InventoryOrganizerSettings } from './schema';
 
 /**
  * Coerces whatever is in `data.json` into valid settings.
@@ -16,9 +12,10 @@ export function validateSettings(stored: unknown): InventoryOrganizerSettings {
 	const raw = isRecord(stored) ? stored : {};
 	return {
 		propertyNames: validatePropertyNames(raw.propertyNames),
-		warnCrossInventory: typeof raw.warnCrossInventory === 'boolean'
-			? raw.warnCrossInventory
-			: DEFAULT_SETTINGS.warnCrossInventory,
+		warnCrossInventory:
+			typeof raw.warnCrossInventory === 'boolean'
+				? raw.warnCrossInventory
+				: DEFAULT_SETTINGS.warnCrossInventory,
 		showPropertyButton:
 			typeof raw.showPropertyButton === 'boolean'
 				? raw.showPropertyButton

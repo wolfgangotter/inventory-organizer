@@ -42,7 +42,11 @@ describe('plugin load', () => {
 	it('registers every command', async () => {
 		const plugin = makePlugin();
 		await plugin.onload();
-		expect(recorded(plugin).commands.map((c) => c.id).sort()).toEqual([
+		expect(
+			recorded(plugin)
+				.commands.map((c) => c.id)
+				.sort(),
+		).toEqual([
 			'create-container',
 			'create-inventory',
 			'create-item',

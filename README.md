@@ -27,7 +27,7 @@ Because these are links rather than opaque ids, Obsidian does most of the work
 for free:
 
 - **Grouped views read properly.** `groupBy: container` in a Base shows
-  *"Brake & Tire Box"*, not a uuid.
+  _"Brake & Tire Box"_, not a uuid.
 - **Renaming a container fixes every item**, because Obsidian rewrites links in
   frontmatter.
 - **A container's backlinks are its contents.** No query needed.
@@ -39,21 +39,21 @@ for free:
 
 Everything above is native. The plugin covers what Obsidian leaves out:
 
-| Command | What it does |
-|---|---|
-| **Move item to container** | A picker showing *this inventory's* containers — not all 4,000 notes in your vault. Recently used first. |
-| **Create inventory** | Scaffolds a root note with both overview Bases, ready to use. |
-| **Create container** | Fills in `inventory`, `id` and your default tags; embeds a contents Base. |
-| **Create item** | Same, and pre-fills the container when you are already looking at one. |
-| **Validate inventory** | Finds dangling containers, unplaced items, untyped notes, duplicate container names. Every row opens the note. |
-| **Undo last bulk move** | Puts a bulk move back. Session only. |
+| Command                    | What it does                                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Move item to container** | A picker showing _this inventory's_ containers — not all 4,000 notes in your vault. Recently used first.       |
+| **Create inventory**       | Scaffolds a root note with both overview Bases, ready to use.                                                  |
+| **Create container**       | Fills in `inventory`, `id` and your default tags; embeds a contents Base.                                      |
+| **Create item**            | Same, and pre-fills the container when you are already looking at one.                                         |
+| **Validate inventory**     | Finds dangling containers, unplaced items, untyped notes, duplicate container names. Every row opens the note. |
+| **Undo last bulk move**    | Puts a bulk move back. Session only.                                                                           |
 
 Plus, outside the palette:
 
 - A **button on the `container` property** of item notes — one tap to move,
   open the container, or take the item out of it.
-- **Bulk move** from a file-explorer multi-selection (right-click → *Move 7
-  items to container*), with folders expanded.
+- **Bulk move** from a file-explorer multi-selection (right-click → _Move 7
+  items to container_), with folders expanded.
 
 ## Getting started
 
@@ -69,17 +69,17 @@ your items grouped by container.
 
 ## Properties
 
-| Property | On | Meaning |
-|---|---|---|
-| `type` | all | `item`, `container` or `inventory`. Structure lives here, not in tags. |
-| `inventory` | items, containers | Link to the inventory root. |
-| `container` | items | Link to the containing container. |
-| `quantity`, `restock` | items | Seeded on creation; yours to use. |
-| `cover` | items | Card image. Seeded empty so you can drop a picture on it. |
-| `banner` | inventories, containers | Header image, shown by the overview views. |
-| `id` | items, containers | A durable key for exporting elsewhere. **Nothing in the plugin reads it.** |
-| `item_folder`, `container_folder`, `default_tags` | inventory | Where new notes go and what tags they get. |
-| `item_defaults`, `container_defaults` | inventory | Extra properties to stamp on new notes — see below. |
+| Property                                          | On                      | Meaning                                                                    |
+| ------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------- |
+| `type`                                            | all                     | `item`, `container` or `inventory`. Structure lives here, not in tags.     |
+| `inventory`                                       | items, containers       | Link to the inventory root.                                                |
+| `container`                                       | items                   | Link to the containing container.                                          |
+| `quantity`, `restock`                             | items                   | Seeded on creation; yours to use.                                          |
+| `cover`                                           | items                   | Card image. Seeded empty so you can drop a picture on it.                  |
+| `banner`                                          | inventories, containers | Header image, shown by the overview views.                                 |
+| `id`                                              | items, containers       | A durable key for exporting elsewhere. **Nothing in the plugin reads it.** |
+| `item_folder`, `container_folder`, `default_tags` | inventory               | Where new notes go and what tags they get.                                 |
+| `item_defaults`, `container_defaults`             | inventory               | Extra properties to stamp on new notes — see below.                        |
 
 Tags are left entirely to you. `bike`, `workshop` and the rest carry meaning for
 you, not for the plugin.

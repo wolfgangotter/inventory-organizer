@@ -92,8 +92,8 @@ describe('readInventoryConfig', () => {
 	});
 
 	it('de-duplicates tags and drops junk', () => {
-		expect(readInventoryConfig({ default_tags: ['bike', 'bike', '', 7, null] }, names).defaultTags).toEqual([
-			'bike',
-		]);
+		expect(
+			readInventoryConfig({ default_tags: ['bike', 'bike', '', 7, null] }, names).defaultTags,
+		).toEqual(['bike']);
 	});
 });

@@ -14,7 +14,7 @@ The two problems that motivated this plugin —
 2. `groupBy: container` shows an opaque uuid instead of a name
 
 — are both symptoms of one cause: **`container` holds a uuid string, which nothing in Obsidian can
-resolve.** Bases *can* dereference links (`link.asFile()` → `file` with `.name` / `.properties`,
+resolve.** Bases _can_ dereference links (`link.asFile()` → `file` with `.name` / `.properties`,
 since 1.9.7). It cannot dereference a uuid, because a uuid is not a path.
 
 The vault already admits this: every item note carries a hand-written `Container: [[Brake & Tire Box]]`
@@ -26,14 +26,14 @@ This deletes the proposed `container_name` property and the whole sync problem i
 
 ### What becomes native (zero plugin code)
 
-| Previously needed | Now provided by |
-|---|---|
-| Copy/paste a container uuid | Native property editor link autocomplete |
-| Readable group headers | `groupBy: container` on a link property |
-| `container_name` mirror property | Nothing — the link *is* the name |
-| Body line `Container: [[…]]` | Nothing — the property is the link |
-| "What is in this container?" | Backlinks pane; graph view |
-| Container renamed | Obsidian rewrites frontmatter links (**P1**) |
+| Previously needed                | Now provided by                              |
+| -------------------------------- | -------------------------------------------- |
+| Copy/paste a container uuid      | Native property editor link autocomplete     |
+| Readable group headers           | `groupBy: container` on a link property      |
+| `container_name` mirror property | Nothing — the link _is_ the name             |
+| Body line `Container: [[…]]`     | Nothing — the property is the link           |
+| "What is in this container?"     | Backlinks pane; graph view                   |
+| Container renamed                | Obsidian rewrites frontmatter links (**P1**) |
 
 ### What the plugin is therefore actually for
 
@@ -55,6 +55,7 @@ Structure lives in properties. Tags stay for user semantics only (`bike`, `works
 carry structural meaning — no more `item` / `container` / `inventarek` tags.
 
 **Item**
+
 ```yaml
 type: item
 inventory: "[[Bike Workshop]]"
@@ -67,6 +68,7 @@ tags: [bike, workshop]
 ```
 
 **Container**
+
 ```yaml
 type: container
 inventory: "[[Bike Workshop]]"
@@ -77,6 +79,7 @@ tags: [bike, workshop]
 
 **Inventory root** — per-inventory config lives in the note, not in plugin settings, so it travels
 with the vault and survives sync:
+
 ```yaml
 type: inventory
 banner: "[[Bike Workshop_banner.jpg]]"
@@ -106,6 +109,7 @@ If it ever becomes load-bearing again, that is a regression.
 ### Bases
 
 Inventory root — containers:
+
 ```yaml
 filters:
   and:
@@ -114,6 +118,7 @@ filters:
 ```
 
 Inventory root — items, grouped readably, with quantities summed per container:
+
 ```yaml
 filters:
   and:
@@ -130,6 +135,7 @@ views:
 ```
 
 Container note — its contents:
+
 ```yaml
 filters:
   and:
@@ -152,13 +158,13 @@ its body.
 Reuse the `probes/` pattern from `cover-image-picker`: a throwaway plugin in the test vault that
 logs answers. Cheap, and each one can invalidate a design assumption.
 
-| # | Question | Why it matters | If it fails |
-|---|---|---|---|
-| ~~**P1**~~ | Rename a container — do item `container:` links rewrite automatically? | The whole "no maintenance" claim rests on this. | **CLOSED 2026-08-23: yes, links rewrite on rename.** No `vault.on('rename')` fallback needed. |
-| ~~**P2**~~ | `groupBy` on a link property — does the header render the note name or raw `[[…]]`? | This is problem 2. | **CLOSED 2026-08-23: renders the name.** `container_name` is dead for good — do not reintroduce it. |
-| ~~**P3**~~ | Does `Link == Link` compare resolved targets or raw text? Used in the container note's contents filter and the inventory root's scoping filters. | If equality were textual, `[[Chain Box]]` and `[[Inventory/Chain Box|the box]]` would fail to match despite pointing at one file — items would silently vanish from their container. | **CLOSED 2026-08-23: equality resolves targets.** `container == this.file.asLink()` matched the alias/path-form link (`Probe Item B`). Ships as-is; no dereference needed. `file.hasLink(this.file)` eliminated — it matched the body-only Decoy, as predicted. |
-| **P4** | Does the properties editor render a `container` link as clickable in both Live Preview and Reading view? | "Click the property to open the container" was an explicit requirement. | Property-row button (Phase 5) covers navigation too. |
-| **P5** | Does `processFrontMatter` round-trip a `"[[Name]]"` value and register it in `frontmatterLinks`? | The write path. | Already answered yes by the cover-image-picker D2 probe (2026-08-17); re-confirm cheaply for a non-image property. |
+| #          | Question                                                                                                                                         | Why it matters                                                          | If it fails                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| ~~**P1**~~ | Rename a container — do item `container:` links rewrite automatically?                                                                           | The whole "no maintenance" claim rests on this.                         | **CLOSED 2026-08-23: yes, links rewrite on rename.** No `vault.on('rename')` fallback needed.                      |
+| ~~**P2**~~ | `groupBy` on a link property — does the header render the note name or raw `[[…]]`?                                                              | This is problem 2.                                                      | **CLOSED 2026-08-23: renders the name.** `container_name` is dead for good — do not reintroduce it.                |
+| ~~**P3**~~ | Does `Link == Link` compare resolved targets or raw text? Used in the container note's contents filter and the inventory root's scoping filters. | If equality were textual, `[[Chain Box]]` and `[[Inventory/Chain Box    | the box]]` would fail to match despite pointing at one file — items would silently vanish from their container.    | **CLOSED 2026-08-23: equality resolves targets.** `container == this.file.asLink()` matched the alias/path-form link (`Probe Item B`). Ships as-is; no dereference needed. `file.hasLink(this.file)` eliminated — it matched the body-only Decoy, as predicted. |
+| **P4**     | Does the properties editor render a `container` link as clickable in both Live Preview and Reading view?                                         | "Click the property to open the container" was an explicit requirement. | Property-row button (Phase 5) covers navigation too.                                                               |
+| **P5**     | Does `processFrontMatter` round-trip a `"[[Name]]"` value and register it in `frontmatterLinks`?                                                 | The write path.                                                         | Already answered yes by the cover-image-picker D2 probe (2026-08-17); re-confirm cheaply for a non-image property. |
 
 **All blocking probes closed 2026-08-23.** P1, P2 and P3 all landed on the favourable answer, which is
 what makes the link-primary model in §2 safe and keeps every filter in §2 dereference-free. Site 2
@@ -225,16 +231,16 @@ may have properties set to Hidden).
 
 ## 5. Commands
 
-| Command | Behaviour |
-|---|---|
-| **Move item to container…** | Fuzzy modal over containers in the item's inventory; shows folder as secondary text; most-recently-used first. Works on the active note, from the `container` property row, or on a file-explorer selection. |
-| **Bulk move** | File-explorer multi-selection (`files-menu`), folders expanded. Mixed selections filter rather than refuse; one confirmation for the whole batch, never one per item; writes sequentially and reports partial failure honestly. |
-| **Undo last bulk move** | Session-only. Restores each item's previous container, unplacing those whose container has since been deleted. Hidden from the palette when there is nothing to undo. |
-| **Create item** | Invoked from a container note → `container` pre-filled. Invoked from an inventory note → container picker. Stamps `type`, `inventory`, `id`, default tags; creates in `item_folder`; opens the note. |
-| **Create container** | Same, minus `container`. |
-| **Create inventory** | Scaffolds the root note with both overview bases, beside the note you were looking at, adopting that folder for its members. One-time, but it is what makes the model reproducible. |
-| **Validate inventory** | Report modal: dangling `container` links, items with no container, notes missing `type` or `inventory`, containers with no items, duplicate container names. Each finding is clickable. |
-| ~~**Migrate legacy inventory**~~ | **Descoped 2026-08-23** at the user's direction: the only vault holding legacy notes is the test vault, so a shipped migration command has no user. §6 records how it was done instead. |
+| Command                          | Behaviour                                                                                                                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Move item to container…**      | Fuzzy modal over containers in the item's inventory; shows folder as secondary text; most-recently-used first. Works on the active note, from the `container` property row, or on a file-explorer selection.                    |
+| **Bulk move**                    | File-explorer multi-selection (`files-menu`), folders expanded. Mixed selections filter rather than refuse; one confirmation for the whole batch, never one per item; writes sequentially and reports partial failure honestly. |
+| **Undo last bulk move**          | Session-only. Restores each item's previous container, unplacing those whose container has since been deleted. Hidden from the palette when there is nothing to undo.                                                           |
+| **Create item**                  | Invoked from a container note → `container` pre-filled. Invoked from an inventory note → container picker. Stamps `type`, `inventory`, `id`, default tags; creates in `item_folder`; opens the note.                            |
+| **Create container**             | Same, minus `container`.                                                                                                                                                                                                        |
+| **Create inventory**             | Scaffolds the root note with both overview bases, beside the note you were looking at, adopting that folder for its members. One-time, but it is what makes the model reproducible.                                             |
+| **Validate inventory**           | Report modal: dangling `container` links, items with no container, notes missing `type` or `inventory`, containers with no items, duplicate container names. Each finding is clickable.                                         |
+| ~~**Migrate legacy inventory**~~ | **Descoped 2026-08-23** at the user's direction: the only vault holding legacy notes is the test vault, so a shipped migration command has no user. §6 records how it was done instead.                                         |
 
 The move command is registered before anything else — with it alone the plugin already solves the
 original complaint, and it is what should be dogfooded while the rest is built.
@@ -267,14 +273,14 @@ must dry-run before it applies.
 
 ## 7. Risks
 
-| Risk | Mitigation |
-|---|---|
-| No public properties API (F1) — the move button is internal-DOM-coupled | One quarantined adapter (`obsidian/property-dom.ts`), degrades to "no button", warns once in the console, and is switchable off in settings. Every command works without it. |
-| Bases filter syntax shifts between releases | Base YAML lives in `templates/`, not in code. Fixing it is a text edit, and existing notes are unaffected. |
-| ~~P1 / P2 fail~~ | Both closed favourably 2026-08-23. Links survive rename; link groupBy renders the name. |
-| ~~P3: Link equality turns out to be textual~~ | Closed — equality resolves targets. `container.asFile().path == this.file.path` remains a verified fallback if the semantics ever change. |
-| Migration corrupts real data | Pure core + fixture tests + mandatory dry-run + `processFrontMatter` only. Test vault first, and it is a git-tracked copy. |
-| Scope creep into "inventory app" | Anything Bases can already express is out of scope. `registerBasesView` exists in 1.13.1 and a drag-and-drop board is tempting — explicitly deferred; the agreed model is what makes it cheap later. |
+| Risk                                                                    | Mitigation                                                                                                                                                                                           |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No public properties API (F1) — the move button is internal-DOM-coupled | One quarantined adapter (`obsidian/property-dom.ts`), degrades to "no button", warns once in the console, and is switchable off in settings. Every command works without it.                         |
+| Bases filter syntax shifts between releases                             | Base YAML lives in `templates/`, not in code. Fixing it is a text edit, and existing notes are unaffected.                                                                                           |
+| ~~P1 / P2 fail~~                                                        | Both closed favourably 2026-08-23. Links survive rename; link groupBy renders the name.                                                                                                              |
+| ~~P3: Link equality turns out to be textual~~                           | Closed — equality resolves targets. `container.asFile().path == this.file.path` remains a verified fallback if the semantics ever change.                                                            |
+| Migration corrupts real data                                            | Pure core + fixture tests + mandatory dry-run + `processFrontMatter` only. Test vault first, and it is a git-tracked copy.                                                                           |
+| Scope creep into "inventory app"                                        | Anything Bases can already express is out of scope. `registerBasesView` exists in 1.13.1 and a drag-and-drop board is tempting — explicitly deferred; the agreed model is what makes it cheap later. |
 
 ---
 
@@ -293,14 +299,14 @@ must dry-run before it applies.
 
 ## 9. Sequence
 
-| Phase | Content | Exit criterion |
-|---|---|---|
-| ~~**0**~~ | Probes | **Done 2026-08-23.** P1–P3 closed favourably; §2 base templates locked |
-| ~~**1**~~ | Repo scaffold, toolchain, pure `core/` with tests | **Done.** `npm run check` green, 87 tests |
-| ~~**2**~~ | Move command + container suggest modal | **Done.** No DOM coupling |
-| ~~**3**~~ | `validate` + report modal (migrate descoped) | **Done.** Test vault converted; validation runs clean |
-| ~~**4**~~ | Creation commands + inventory scaffolding | **Done.** New inventory reproducible from nothing |
-| ~~**5**~~ | Property-row move button (internal DOM, optional) | **Done.** Button works; the toggle removes it with no functional loss |
+| Phase     | Content                                                    | Exit criterion                                                                                                        |
+| --------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| ~~**0**~~ | Probes                                                     | **Done 2026-08-23.** P1–P3 closed favourably; §2 base templates locked                                                |
+| ~~**1**~~ | Repo scaffold, toolchain, pure `core/` with tests          | **Done.** `npm run check` green, 87 tests                                                                             |
+| ~~**2**~~ | Move command + container suggest modal                     | **Done.** No DOM coupling                                                                                             |
+| ~~**3**~~ | `validate` + report modal (migrate descoped)               | **Done.** Test vault converted; validation runs clean                                                                 |
+| ~~**4**~~ | Creation commands + inventory scaffolding                  | **Done.** New inventory reproducible from nothing                                                                     |
+| ~~**5**~~ | Property-row move button (internal DOM, optional)          | **Done.** Button works; the toggle removes it with no functional loss                                                 |
 | ~~**6**~~ | File-menu bulk move, settings tab, README, load smoke test | **Done.** 139 tests; `main.ts`, the DOM adapter and the file-explorer adapters are covered against a stubbed Obsidian |
 
 Phases 2 and 3 are the ones that pay for the plugin. 5 is a convenience and can be cut.

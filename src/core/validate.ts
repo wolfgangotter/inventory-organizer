@@ -133,9 +133,7 @@ export function validateInventory(notes: readonly InventoryNote[], inventoryPath
 
 	findings.push(...duplicateContainerNames(containers));
 
-	return findings.sort(
-		(a, b) => RANK[a.severity] - RANK[b.severity] || a.path.localeCompare(b.path),
-	);
+	return findings.sort((a, b) => RANK[a.severity] - RANK[b.severity] || a.path.localeCompare(b.path));
 }
 
 /**

@@ -47,26 +47,26 @@ Be honest about this table. Almost nothing has been exercised by hand yet: the
 plugin was built against a converted test vault and a probe, and a first release
 is the wrong time to discover a platform difference.
 
-| Case | Status |
-|---|---|
-| Bases: link equality resolves across link forms (P1–P3) | ✅ probe-verified 2026-08-23 |
-| Bases: `groupBy: container` renders the container name | ✅ probe-verified 2026-08-23 |
-| Rename a container — every item's link follows | ✅ probe-verified 2026-08-23 |
-| Desktop: move an item via the command palette | ⬜ |
-| Desktop: move via the container property button, placed and unplaced | ⬜ |
-| Desktop: create inventory → container → item, end to end | ⬜ |
-| Create item from inside a container — container pre-filled, no picker | ⬜ |
-| Bulk move: several notes, folder, and a mixed selection | ⬜ |
-| Bulk move: undo, including after deleting the original container | ⬜ |
-| Cross-inventory move — confirm appears, and respects the setting | ⬜ |
-| Validate: each finding type, and every row opens its note | ⬜ |
-| Properties set to `Hidden`/`Source` in Obsidian settings | ⬜ — commands must be fully sufficient |
-| Popout window (desktop) — button appears, and is cleaned up | ⬜ |
-| iOS / iPadOS: every command, and the property button | ⬜ |
-| Renamed properties (`type`, `container`) via settings | ⬜ unit-tested only |
-| Type in a note, then move it within ~2s — nothing typed is lost | ⬜ — the flush path, see below |
-| Disable/enable: no stray buttons left behind | ✅ automated (`tests/plugin-load.test.ts`) |
-| Unreadable `data.json` falls back to defaults | ✅ automated (`tests/plugin-load.test.ts`) |
+| Case                                                                  | Status                                     |
+| --------------------------------------------------------------------- | ------------------------------------------ |
+| Bases: link equality resolves across link forms (P1–P3)               | ✅ probe-verified 2026-08-23               |
+| Bases: `groupBy: container` renders the container name                | ✅ probe-verified 2026-08-23               |
+| Rename a container — every item's link follows                        | ✅ probe-verified 2026-08-23               |
+| Desktop: move an item via the command palette                         | ⬜                                         |
+| Desktop: move via the container property button, placed and unplaced  | ⬜                                         |
+| Desktop: create inventory → container → item, end to end              | ⬜                                         |
+| Create item from inside a container — container pre-filled, no picker | ⬜                                         |
+| Bulk move: several notes, folder, and a mixed selection               | ⬜                                         |
+| Bulk move: undo, including after deleting the original container      | ⬜                                         |
+| Cross-inventory move — confirm appears, and respects the setting      | ⬜                                         |
+| Validate: each finding type, and every row opens its note             | ⬜                                         |
+| Properties set to `Hidden`/`Source` in Obsidian settings              | ⬜ — commands must be fully sufficient     |
+| Popout window (desktop) — button appears, and is cleaned up           | ⬜                                         |
+| iOS / iPadOS: every command, and the property button                  | ⬜                                         |
+| Renamed properties (`type`, `container`) via settings                 | ⬜ unit-tested only                        |
+| Type in a note, then move it within ~2s — nothing typed is lost       | ⬜ — the flush path, see below             |
+| Disable/enable: no stray buttons left behind                          | ✅ automated (`tests/plugin-load.test.ts`) |
+| Unreadable `data.json` falls back to defaults                         | ✅ automated (`tests/plugin-load.test.ts`) |
 
 **On the flush row:** `FrontmatterWriter` calls `view.save()` before every write
 because `requestSave` is debounced by two seconds while `processFrontMatter`
@@ -76,7 +76,7 @@ is the one row worth doing carefully.
 
 **On the iOS rows:** the property button carries two defensive details inherited
 from cover-image-picker — never `preventDefault` on `touchstart`, and a 44px
-touch target — but neither has been exercised on a device *here*.
+touch target — but neither has been exercised on a device _here_.
 
 ## 3. Release and submission
 
@@ -88,9 +88,9 @@ goes through the community directory web interface. (Confirmed 2026-08-24.)
    be publicly readable for review.
 2. **Tag exactly `1.0.0`** — no leading `v`. The tag must equal the manifest
    version or the automated check fails.
-   ```bash
-   git tag 1.0.0 && git push origin 1.0.0
-   ```
+    ```bash
+    git tag 1.0.0 && git push origin 1.0.0
+    ```
 3. The release workflow builds and opens a **draft** release with `main.js`,
    `manifest.json` and `styles.css` attached as individual files. Review it and
    **publish** it — a draft is invisible to the directory.

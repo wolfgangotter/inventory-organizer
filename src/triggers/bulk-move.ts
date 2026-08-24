@@ -76,7 +76,9 @@ function confirmAndRun(
 
 	if (plan.movable.length === 0) {
 		new Notice(
-			plan.skipped.length > 0 ? 'Everything selected is already in that container.' : 'Nothing to move.',
+			plan.skipped.length > 0
+				? 'Everything selected is already in that container.'
+				: 'Nothing to move.',
 		);
 		return;
 	}

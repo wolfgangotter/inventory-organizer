@@ -41,10 +41,7 @@ describe('expandSelection', () => {
 			expandSelection(selection(outer))
 				.map((f) => f.path)
 				.sort(),
-		).toEqual([
-			'Inv/A.md',
-			'Inv/Boxes/C.md',
-		]);
+		).toEqual(['Inv/A.md', 'Inv/Boxes/C.md']);
 	});
 
 	it('de-duplicates a file selected both directly and through its folder', () => {

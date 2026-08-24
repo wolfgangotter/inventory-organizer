@@ -36,15 +36,12 @@ export class FrontmatterWriter {
 	async apply(file: TFile, patch: FrontmatterPatch): Promise<void> {
 		await this.flushOpenEditors(file);
 		try {
-			await this.app.fileManager.processFrontMatter(
-				file,
-				(frontmatter: Record<string, unknown>) => {
-					for (const [key, value] of Object.entries(patch.set)) {
-						if (value === null) delete frontmatter[key];
-						else frontmatter[key] = value;
-					}
-				},
-			);
+			await this.app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
+				for (const [key, value] of Object.entries(patch.set)) {
+					if (value === null) delete frontmatter[key];
+					else frontmatter[key] = value;
+				}
+			});
 		} catch (err) {
 			// Most likely a YAMLParseError from frontmatter broken by hand.
 			// The cause stays in the console; the user gets a safe message.
