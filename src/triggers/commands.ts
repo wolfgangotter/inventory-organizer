@@ -1,4 +1,5 @@
 import { MarkdownView } from 'obsidian';
+import { undoLastBulkMove } from './bulk-move';
 import { startCreateContainer, startCreateInventory, startCreateItem } from './create';
 import { startMove } from './move';
 import { startValidate } from './validate';
@@ -63,6 +64,18 @@ export function registerCommands(plugin: InventoryOrganizerPlugin): void {
 		name: 'Create item',
 		callback: () => {
 			startCreateItem(plugin, activeFile());
+		},
+	});
+
+	plugin.addCommand({
+		id: 'undo-last-bulk-move',
+		name: 'Undo last bulk move',
+		checkCallback: (checking: boolean) => {
+			// Hidden rather than shown-and-refusing, so the palette never offers
+			// an undo that would do nothing.
+			if (!plugin.lastBulkMove) return false;
+			if (!checking) void undoLastBulkMove(plugin);
+			return true;
 		},
 	});
 }

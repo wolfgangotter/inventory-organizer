@@ -215,7 +215,9 @@ may have properties set to Hidden).
 
 | Command | Behaviour |
 |---|---|
-| **Move item to container…** | Fuzzy modal over containers in the item's inventory; shows folder as secondary text; most-recently-used first; "＋ New container…" as the last entry. Works on the active note, or on a file-explorer multi-selection. |
+| **Move item to container…** | Fuzzy modal over containers in the item's inventory; shows folder as secondary text; most-recently-used first. Works on the active note, from the `container` property row, or on a file-explorer selection. |
+| **Bulk move** | File-explorer multi-selection (`files-menu`), folders expanded. Mixed selections filter rather than refuse; one confirmation for the whole batch, never one per item; writes sequentially and reports partial failure honestly. |
+| **Undo last bulk move** | Session-only. Restores each item's previous container, unplacing those whose container has since been deleted. Hidden from the palette when there is nothing to undo. |
 | **Create item** | Invoked from a container note → `container` pre-filled. Invoked from an inventory note → container picker. Stamps `type`, `inventory`, `id`, default tags; creates in `item_folder`; opens the note. |
 | **Create container** | Same, minus `container`. |
 | **Create inventory** | Scaffolds the root note with both overview bases, beside the note you were looking at, adopting that folder for its members. One-time, but it is what makes the model reproducible. |
@@ -287,8 +289,8 @@ must dry-run before it applies.
 | ~~**3**~~ | `validate` + report modal (migrate descoped) | **Done.** Test vault converted; validation runs clean |
 | ~~**4**~~ | Creation commands + inventory scaffolding | **Done.** New inventory reproducible from nothing |
 | ~~**5**~~ | Property-row move button (internal DOM, optional) | **Done.** Button works; the toggle removes it with no functional loss |
-| **6** | File-menu bulk move, settings tab, README | Release checklist |
+| **6** | ~~File-menu bulk move~~, ~~settings tab~~, README | **Bulk move and settings done.** README and release prep remain |
 
 Phases 2 and 3 are the ones that pay for the plugin. 5 is a convenience and can be cut.
 
-Remaining: **6** (bulk move from a file-explorer multi-selection, README, release prep).
+Remaining: README and release prep. A plugin-load smoke test still needs an `obsidian` stub aliased in `vitest.config.ts`; `main.ts`, the DOM adapter and the file-explorer adapters are the parts with no automated coverage.

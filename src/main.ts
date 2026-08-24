@@ -11,7 +11,9 @@ import {
 import { InventoryOrganizerSettingTab } from './settings/tab';
 import { validateSettings } from './settings/validate';
 import { withRecent } from './core/recent';
+import type { BulkUndo } from './triggers/bulk-move';
 import { registerCommands } from './triggers/commands';
+import { registerFileMenu } from './triggers/file-menu';
 
 export default class InventoryOrganizerPlugin extends Plugin {
 	settings: InventoryOrganizerSettings = DEFAULT_SETTINGS;
@@ -19,6 +21,14 @@ export default class InventoryOrganizerPlugin extends Plugin {
 	frontmatter!: FrontmatterWriter;
 	notes!: NoteFactory;
 	private propertyDom!: PropertyDomAdapter;
+	/**
+	 * The last bulk move, for the undo command.
+	 *
+	 * Session-only and never persisted: offering to undo a move from a previous
+	 * run means acting on a vault this plugin has no reason to believe it still
+	 * understands.
+	 */
+	lastBulkMove: BulkUndo | null = null;
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
@@ -32,6 +42,7 @@ export default class InventoryOrganizerPlugin extends Plugin {
 		this.propertyDom = this.addChild(new PropertyDomAdapter(this));
 
 		registerCommands(this);
+		registerFileMenu(this);
 		this.addSettingTab(new InventoryOrganizerSettingTab(this.app, this));
 	}
 
