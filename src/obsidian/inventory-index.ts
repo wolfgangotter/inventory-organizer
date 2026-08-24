@@ -117,9 +117,10 @@ export class InventoryIndex {
 
 	/** Config from an inventory root note, by path. */
 	configFor(inventoryPath: string): InventoryConfig {
+		const names = this.names();
 		const file = this.app.vault.getFileByPath(inventoryPath);
-		if (!(file instanceof TFile)) return readInventoryConfig(undefined);
-		return readInventoryConfig(this.app.metadataCache.getFileCache(file)?.frontmatter);
+		if (!(file instanceof TFile)) return readInventoryConfig(undefined, names);
+		return readInventoryConfig(frontmatterOf(this.app.metadataCache.getFileCache(file)), names);
 	}
 
 	fileFor(note: InventoryNote): TFile | null {

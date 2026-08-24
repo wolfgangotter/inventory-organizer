@@ -54,38 +54,45 @@ describe('isBlank', () => {
 describe('readInventoryConfig', () => {
 	it('reads folders and tags', () => {
 		expect(
-			readInventoryConfig({
-				item_folder: 'Inventory/Bike',
-				container_folder: 'Inventory/Bike/Boxes',
-				default_tags: ['bike', '#workshop'],
-			}),
+			readInventoryConfig(
+				{
+					item_folder: 'Inventory/Bike',
+					container_folder: 'Inventory/Bike/Boxes',
+					default_tags: ['bike', '#workshop'],
+				},
+				names,
+			),
 		).toEqual({
 			itemFolder: 'Inventory/Bike',
 			containerFolder: 'Inventory/Bike/Boxes',
 			defaultTags: ['bike', 'workshop'],
+			itemDefaults: {},
+			containerDefaults: {},
 		});
 	});
 
 	it('defaults to nothing', () => {
-		expect(readInventoryConfig(undefined)).toEqual({
+		expect(readInventoryConfig(undefined, names)).toEqual({
 			itemFolder: null,
 			containerFolder: null,
 			defaultTags: [],
+			itemDefaults: {},
+			containerDefaults: {},
 		});
 	});
 
 	it('refuses to let a folder escape upwards', () => {
-		expect(readInventoryConfig({ item_folder: '../../etc' }).itemFolder).toBe('etc');
-		expect(readInventoryConfig({ item_folder: '..' }).itemFolder).toBeNull();
-		expect(readInventoryConfig({ item_folder: './Inv/./Bike' }).itemFolder).toBe('Inv/Bike');
+		expect(readInventoryConfig({ item_folder: '../../etc' }, names).itemFolder).toBe('etc');
+		expect(readInventoryConfig({ item_folder: '..' }, names).itemFolder).toBeNull();
+		expect(readInventoryConfig({ item_folder: './Inv/./Bike' }, names).itemFolder).toBe('Inv/Bike');
 	});
 
 	it('accepts a single tag as a string', () => {
-		expect(readInventoryConfig({ default_tags: 'bike' }).defaultTags).toEqual(['bike']);
+		expect(readInventoryConfig({ default_tags: 'bike' }, names).defaultTags).toEqual(['bike']);
 	});
 
 	it('de-duplicates tags and drops junk', () => {
-		expect(readInventoryConfig({ default_tags: ['bike', 'bike', '', 7, null] }).defaultTags).toEqual([
+		expect(readInventoryConfig({ default_tags: ['bike', 'bike', '', 7, null] }, names).defaultTags).toEqual([
 			'bike',
 		]);
 	});

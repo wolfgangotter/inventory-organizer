@@ -61,6 +61,8 @@ Plus, outside the palette:
 2. Add your tags to `default_tags` in its frontmatter — they will be stamped on
    every note the inventory creates.
 3. Run **Create container**, then **Create item** from inside that container.
+4. Optional: declare any extra properties your items should carry, under
+   [Your own properties](#your-own-properties).
 
 The inventory note already contains the two Bases that list your containers and
 your items grouped by container.
@@ -73,14 +75,50 @@ your items grouped by container.
 | `inventory` | items, containers | Link to the inventory root. |
 | `container` | items | Link to the containing container. |
 | `quantity`, `restock` | items | Seeded on creation; yours to use. |
+| `cover` | items | Card image. Seeded empty so you can drop a picture on it. |
+| `banner` | inventories, containers | Header image, shown by the overview views. |
 | `id` | items, containers | A durable key for exporting elsewhere. **Nothing in the plugin reads it.** |
 | `item_folder`, `container_folder`, `default_tags` | inventory | Where new notes go and what tags they get. |
+| `item_defaults`, `container_defaults` | inventory | Extra properties to stamp on new notes — see below. |
 
 Tags are left entirely to you. `bike`, `workshop` and the rest carry meaning for
 you, not for the plugin.
 
 Every property name is configurable if `type` or `container` is already taken in
 your vault.
+
+### Your own properties
+
+The table above is what the plugin needs. Anything else your inventory should
+carry, you declare on the inventory root note itself:
+
+```yaml
+type: inventory
+item_defaults:
+  condition: new
+  purchased:
+  warranty_months: 24
+container_defaults:
+  location: shelf
+```
+
+Every item this inventory creates now starts with a `condition`, an empty
+`purchased` date and a `warranty_months`; every container starts with a
+`location`. Edit the block in Obsidian's own property editor — there is no
+separate settings screen for it, and the declaration lives in the vault, so it
+syncs to your other devices along with the notes.
+
+Worth knowing:
+
+- It is **per inventory**. A pantry and a bike workshop want different fields,
+  and each declares its own.
+- A declaration **overrides** what the plugin seeds. Setting `quantity: 0` or
+  `cover: "[[placeholder.png]]"` in `item_defaults` does what you would expect.
+- It **cannot** touch `type`, `inventory`, `container` or `id`. Those are what
+  makes a note findable; entries for them are ignored.
+- Values are single values or flat lists. Nested blocks are ignored, because the
+  property editor cannot edit them back out.
+- It applies to notes created **from then on**. Existing notes are left alone.
 
 ## Settings
 
