@@ -289,8 +289,8 @@ must dry-run before it applies.
 | ~~**3**~~ | `validate` + report modal (migrate descoped) | **Done.** Test vault converted; validation runs clean |
 | ~~**4**~~ | Creation commands + inventory scaffolding | **Done.** New inventory reproducible from nothing |
 | ~~**5**~~ | Property-row move button (internal DOM, optional) | **Done.** Button works; the toggle removes it with no functional loss |
-| **6** | ~~File-menu bulk move~~, ~~settings tab~~, README | **Bulk move and settings done.** README and release prep remain |
+| ~~**6**~~ | File-menu bulk move, settings tab, README, load smoke test | **Done.** 139 tests; `main.ts`, the DOM adapter and the file-explorer adapters are covered against a stubbed Obsidian |
 
 Phases 2 and 3 are the ones that pay for the plugin. 5 is a convenience and can be cut.
 
-Remaining: README and release prep. A plugin-load smoke test still needs an `obsidian` stub aliased in `vitest.config.ts`; `main.ts`, the DOM adapter and the file-explorer adapters are the parts with no automated coverage.
+All six phases are complete. Remaining before a public release: the community-plugin submission checklist, a demo recording, and testing on iOS - the property-row button and the pickers have only been exercised on desktop.

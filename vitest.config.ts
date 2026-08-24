@@ -1,12 +1,15 @@
 import { defineConfig } from 'vitest/config';
+import { fileURLToPath } from 'node:url';
 
-/*
- * No `obsidian` alias yet: every module under test is pure and imports nothing.
- * When a plugin-load smoke test arrives it will need a stub aliased here, the
- * way cover-image-picker does it - but pointing the alias at a file that does
- * not exist would be worse than not having one.
- */
 export default defineConfig({
+	resolve: {
+		alias: {
+			// The load smoke test and the file-explorer tests exercise real
+			// plugin code, which imports `obsidian`. Everything under core/
+			// imports nothing at all.
+			obsidian: fileURLToPath(new URL('./tests/stubs/obsidian.ts', import.meta.url)),
+		},
+	},
 	test: {
 		environment: 'node',
 		include: ['tests/**/*.test.ts'],
