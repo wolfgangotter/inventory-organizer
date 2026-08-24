@@ -1,7 +1,8 @@
 # Inventory Organizer
 
-Track physical things in Obsidian — bike parts, workshop tools, boxes of
-cables — using nothing but frontmatter links and native [Bases](https://obsidian.md/help/bases).
+Create inventories in Obsidian to keep track of all sorts of things (bike parts,
+workshop tools, camera equipment, etc.) using nothing but frontmatter links and
+native [Bases](https://obsidian.md/help/bases).
 
 The plugin does not build a database, a view, or a UI of its own. It maintains
 three properties and gets out of the way, so what you end up with is a pile of
