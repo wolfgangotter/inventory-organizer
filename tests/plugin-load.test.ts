@@ -63,7 +63,13 @@ describe('plugin load', () => {
 		// By key rather than by count, so adding a setting does not fail a test
 		// that is really about the definitions being reachable at all.
 		const keys = (tab?.getSettingDefinitions() ?? []).map((definition) => definition.control.key);
-		expect(keys.sort()).toEqual(['cardImages', 'showPropertyButton', 'warnCrossInventory']);
+		expect(keys.sort()).toEqual([
+			'cardImages',
+			'propertyNames.banner',
+			'propertyNames.cover',
+			'showPropertyButton',
+			'warnCrossInventory',
+		]);
 	});
 
 	it('falls back to defaults when data.json cannot be read', async () => {

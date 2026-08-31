@@ -92,8 +92,16 @@ seed is written before your own declaration is read.
 Tags are left entirely to you. `bike`, `workshop` and the rest carry meaning for
 you, not for the plugin.
 
-Every property name is configurable if `type` or `container` is already taken in
-your vault.
+Every property name is configurable if one of them is already taken in your
+vault. The two image properties have fields in the settings; the four structural
+ones live in `data.json`, because renaming `container` after the fact orphans
+every note still carrying the old name — that is a migration, not a setting.
+
+Names are restricted to letters, digits and underscores, starting with a letter.
+Obsidian itself is happy with `item image` or `item-image`, but these names are
+written into the generated Bases, and there a space ends the identifier while a
+hyphen reads as subtraction — `note.item-image` resolves to `note.item` minus
+`image` and the view silently shows nothing.
 
 ### Your own properties
 
@@ -141,12 +149,16 @@ Worth knowing:
 - **Confirm moves between inventories** — moving an item into another
   inventory's container is allowed, but asks first.
 - **Card images** — off by default. Switched on, the Bases written into new
-  notes bind `cover` on item cards and `banner` on container cards, and the
-  matching empty property is written so there is a row to drop a picture onto.
-  This is a plugin setting rather than a per-inventory declaration for one
-  reason: an inventory root's own two Bases are written at the moment the root
-  note is created, before it can declare anything. It applies to notes created
-  from then on.
+  notes bind an image property on item and container cards, and that property is
+  written empty so there is a row to drop a picture onto. This is a plugin
+  setting rather than a per-inventory declaration for one reason: an inventory
+  root's own two Bases are written at the moment the root note is created,
+  before it can declare anything. It applies to notes created from then on.
+- **Item image property** / **Container image property** — which properties
+  those are. `cover` and `banner` by default; set them to `item_image` and
+  `container_image`, or to whatever your theme already reads. Both fields appear
+  only while card images are on, and reject a name that another property holds
+  or that the Bases could not read.
 
 ## Design notes
 

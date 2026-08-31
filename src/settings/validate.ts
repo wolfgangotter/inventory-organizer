@@ -1,4 +1,9 @@
-import { DEFAULT_PROPERTY_NAMES, type PropertyNames } from '../core/schema';
+import {
+	DEFAULT_PROPERTY_NAMES,
+	propertyNameProblem,
+	RESERVED_TAG_KEY,
+	type PropertyNames,
+} from '../core/schema';
 import { DEFAULT_SETTINGS, MAX_RECENT_CONTAINERS, type InventoryOrganizerSettings } from './schema';
 
 /**
@@ -25,16 +30,45 @@ export function validateSettings(stored: unknown): InventoryOrganizerSettings {
 	};
 }
 
+/**
+ * Applies the stored property names, refusing any the rest of the plugin could
+ * not use.
+ *
+ * The settings field validates before it persists, so a bad name only reaches
+ * here from a hand-edited or downgraded `data.json` - but it has to be caught,
+ * because these names are interpolated into the Bases blocks written to disk.
+ * A refused name falls back to its default and says so on the console: silently
+ * writing views that match nothing is the failure this exists to prevent.
+ */
 function validatePropertyNames(stored: unknown): PropertyNames {
 	const raw = isRecord(stored) ? stored : {};
 	const result = { ...DEFAULT_PROPERTY_NAMES };
 	for (const key of Object.keys(DEFAULT_PROPERTY_NAMES) as (keyof PropertyNames)[]) {
 		const value = raw[key];
-		// A blank or non-string name would silently disable the property, which
-		// is far more confusing than ignoring the stored value.
-		if (typeof value === 'string' && value.trim()) result[key] = value.trim();
+		// A non-string name would silently disable the property, which is far
+		// more confusing than ignoring the stored value.
+		if (typeof value !== 'string') continue;
+		const name = value.trim();
+		if (name === result[key]) continue;
+
+		const problem = propertyNameProblem(name, takenNames(result, key));
+		if (problem) {
+			console.warn(`[inventory-organizer] ignoring the stored ${key} property name: ${problem}`);
+			continue;
+		}
+		result[key] = name;
 	}
 	return result;
+}
+
+/** Every name already spoken for, from the point of view of `key`. */
+export function takenNames(names: PropertyNames, key: keyof PropertyNames): string[] {
+	const others = (Object.keys(names) as (keyof PropertyNames)[])
+		.filter((other) => other !== key)
+		.map((other) => names[other]);
+	// `tags` is written on every created note too, so renaming onto it would
+	// have the note's tag list overwrite the property on the next creation.
+	return [...others, RESERVED_TAG_KEY];
 }
 
 function validateRecent(stored: unknown): string[] {
