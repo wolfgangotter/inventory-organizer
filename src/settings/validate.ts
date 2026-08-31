@@ -20,6 +20,7 @@ export function validateSettings(stored: unknown): InventoryOrganizerSettings {
 			typeof raw.showPropertyButton === 'boolean'
 				? raw.showPropertyButton
 				: DEFAULT_SETTINGS.showPropertyButton,
+		cardImages: typeof raw.cardImages === 'boolean' ? raw.cardImages : DEFAULT_SETTINGS.cardImages,
 		recentContainers: validateRecent(raw.recentContainers),
 	};
 }

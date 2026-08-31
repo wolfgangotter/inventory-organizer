@@ -15,7 +15,7 @@ import { installObsidianDom } from './stubs/dom';
 /** The stub Plugin records these; the real `Plugin` type does not expose them. */
 interface Recorded {
 	commands: { id: string; name: string }[];
-	settingTabs: { getSettingDefinitions: () => unknown[] }[];
+	settingTabs: { getSettingDefinitions: () => { control: { key: string } }[] }[];
 	failLoad: boolean;
 }
 const recorded = (plugin: InventoryOrganizerPlugin) => plugin as unknown as Recorded;
@@ -60,7 +60,10 @@ describe('plugin load', () => {
 		const plugin = makePlugin();
 		await plugin.onload();
 		const tab = recorded(plugin).settingTabs[0];
-		expect(tab?.getSettingDefinitions()).toHaveLength(2);
+		// By key rather than by count, so adding a setting does not fail a test
+		// that is really about the definitions being reachable at all.
+		const keys = (tab?.getSettingDefinitions() ?? []).map((definition) => definition.control.key);
+		expect(keys.sort()).toEqual(['cardImages', 'showPropertyButton', 'warnCrossInventory']);
 	});
 
 	it('falls back to defaults when data.json cannot be read', async () => {

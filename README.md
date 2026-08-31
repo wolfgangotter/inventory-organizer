@@ -18,10 +18,13 @@ An **item** note points at the **container** it sits in, and both point at the
 type: item
 inventory: "[[Bike Workshop]]"
 container: "[[Brake & Tire Box]]"
-quantity: 1
-restock: false
 ---
 ```
+
+That is the whole note a new item starts as. Everything else it should carry —
+a quantity, a condition, a restock checkbox — is [yours to
+declare](#your-own-properties), because a bin of brake cables and a film
+collection do not want the same fields.
 
 Because these are links rather than opaque ids, Obsidian does most of the work
 for free:
@@ -61,25 +64,30 @@ Plus, outside the palette:
 2. Add your tags to `default_tags` in its frontmatter — they will be stamped on
    every note the inventory creates.
 3. Run **Create container**, then **Create item** from inside that container.
-4. Optional: declare any extra properties your items should carry, under
-   [Your own properties](#your-own-properties).
+4. Declare any properties your items should carry — a quantity, a condition, a
+   restock checkbox — under [Your own properties](#your-own-properties).
 
 The inventory note already contains the two Bases that list your containers and
 your items grouped by container.
 
 ## Properties
 
-| Property                                          | On                      | Meaning                                                                    |
-| ------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------- |
-| `type`                                            | all                     | `item`, `container` or `inventory`. Structure lives here, not in tags.     |
-| `inventory`                                       | items, containers       | Link to the inventory root.                                                |
-| `container`                                       | items                   | Link to the containing container.                                          |
-| `quantity`, `restock`                             | items                   | Seeded on creation; yours to use.                                          |
-| `cover`                                           | items                   | Card image. Seeded empty so you can drop a picture on it.                  |
-| `banner`                                          | inventories, containers | Header image, shown by the overview views.                                 |
-| `id`                                              | items, containers       | A durable key for exporting elsewhere. **Nothing in the plugin reads it.** |
-| `item_folder`, `container_folder`, `default_tags` | inventory               | Where new notes go and what tags they get.                                 |
-| `item_defaults`, `container_defaults`             | inventory               | Extra properties to stamp on new notes — see below.                        |
+| Property                                          | On                | Meaning                                                                      |
+| ------------------------------------------------- | ----------------- | ---------------------------------------------------------------------------- |
+| `type`                                            | all               | `item`, `container` or `inventory`. Structure lives here, not in tags.       |
+| `inventory`                                       | items, containers | Link to the inventory root.                                                  |
+| `container`                                       | items             | Link to the containing container.                                            |
+| `cover`, `banner`                                 | items, containers | Card image, written only with **Card images** on. See [Settings](#settings). |
+| `id`                                              | items, containers | A durable key for exporting elsewhere. **Nothing in the plugin reads it.**   |
+| `item_folder`, `container_folder`, `default_tags` | inventory         | Where new notes go and what tags they get.                                   |
+| `item_defaults`, `container_defaults`             | inventory         | Extra properties to stamp on new notes — see below.                          |
+
+That really is the whole list. A new note gets its type, its links, an id and
+your tags — nothing else is guessed, and the generated Bases read nothing else
+either. An earlier version seeded `quantity`, `restock` and an empty `cover` on
+every item and shipped a _Restock_ view in every container; useful for a bike
+workshop, noise for a shelf of films, and impossible to take back, because a
+seed is written before your own declaration is read.
 
 Tags are left entirely to you. `bike`, `workshop` and the rest carry meaning for
 you, not for the plugin.
@@ -95,6 +103,8 @@ carry, you declare on the inventory root note itself:
 ```yaml
 type: inventory
 item_defaults:
+  quantity: 1
+  restock: false
   condition: new
   purchased:
   warranty_months: 24
@@ -102,9 +112,9 @@ container_defaults:
   location: shelf
 ```
 
-Every item this inventory creates now starts with a `condition`, an empty
-`purchased` date and a `warranty_months`; every container starts with a
-`location`. Edit the block in Obsidian's own property editor — there is no
+Every item this inventory creates now starts with a `quantity`, an unticked
+`restock` checkbox, a `condition`, an empty `purchased` date and a
+`warranty_months`; every container starts with a `location`. Edit the block in Obsidian's own property editor — there is no
 separate settings screen for it, and the declaration lives in the vault, so it
 syncs to your other devices along with the notes.
 
@@ -112,8 +122,11 @@ Worth knowing:
 
 - It is **per inventory**. A pantry and a bike workshop want different fields,
   and each declares its own.
-- A declaration **overrides** what the plugin seeds. Setting `quantity: 0` or
-  `cover: "[[placeholder.png]]"` in `item_defaults` does what you would expect.
+- **Write the value you want, not a bare key.** Obsidian reads the type from the
+  value, so `restock: false` gives you a checkbox where a bare `restock:` gives
+  you an empty text row.
+- With **Card images** on, a declaration **overrides** the empty `cover` the
+  plugin writes — `cover: "[[placeholder.png]]"` does what you would expect.
 - It **cannot** touch `type`, `inventory`, `container` or `id`. Those are what
   makes a note findable; entries for them are ignored.
 - Values are single values or flat lists. Nested blocks are ignored, because the
@@ -127,6 +140,13 @@ Worth knowing:
   command works without it, and you can switch it off.
 - **Confirm moves between inventories** — moving an item into another
   inventory's container is allowed, but asks first.
+- **Card images** — off by default. Switched on, the Bases written into new
+  notes bind `cover` on item cards and `banner` on container cards, and the
+  matching empty property is written so there is a row to drop a picture onto.
+  This is a plugin setting rather than a per-inventory declaration for one
+  reason: an inventory root's own two Bases are written at the moment the root
+  note is created, before it can declare anything. It applies to notes created
+  from then on.
 
 ## Design notes
 
@@ -145,6 +165,14 @@ roll back to, and pretending otherwise would be worse than saying what happened.
 **Nothing is auto-fixed.** Validation reports; it never repairs. Each finding
 has several plausible fixes and choosing one for you is how data gets quietly
 lost.
+
+**Generated views read only what the plugin owns.** A container's Base lists the
+notes that point at it; the inventory's Bases list its containers and its items
+grouped by container. No column, filter or sort touches a property you did not
+ask for, so the block is a starting point you can edit rather than a set of
+assumptions you have to undo. Every property name in those blocks follows your
+configured names, so renaming `container` does not leave you with views that
+silently match nothing.
 
 ## Development
 

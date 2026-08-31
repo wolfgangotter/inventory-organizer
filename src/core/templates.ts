@@ -1,3 +1,5 @@
+import type { PropertyNames } from './schema';
+
 /**
  * The Bases blocks written into new notes.
  *
@@ -11,19 +13,43 @@
  *   - never `asFile()`: dereferencing costs per row and buys nothing, because
  *     Link equality already resolves
  *
+ * What they deliberately do NOT do is read any property beyond the four the
+ * model is built on. An earlier version ordered cards by `quantity` and shipped
+ * a "Restock" view filtered on `restock == true`, which meant every container
+ * in every vault carried a tab for a workflow most inventories do not have. A
+ * generated view should show what the plugin knows - which notes belong here -
+ * and leave the columns to the person who knows what they are inventorying.
+ *
  * Kept as plain strings rather than built from a YAML library on purpose: this
  * is user-editable content, and it should land in the note looking exactly the
  * way a person would have written it.
  */
 
+export interface BaseOptions {
+	/**
+	 * Bind `cover` / `banner` as the card image.
+	 *
+	 * A setting rather than a per-inventory declaration because the inventory
+	 * root's own two views are written at the moment the root note is created,
+	 * before it can declare anything - and re-adding the binding by hand to
+	 * every container's block afterwards is exactly the tedium worth avoiding.
+	 */
+	cardImages: boolean;
+}
+
+/** Drops the lines an option switched off, keeping the block free of blanks. */
+function block(lines: (string | null)[]): string {
+	return lines.filter((line): line is string => line !== null).join('\n');
+}
+
 /** Lists the items sitting in this container. Goes in a container note. */
-export function containerBase(): string {
-	return [
+export function containerBase(names: PropertyNames, options: BaseOptions): string {
+	return block([
 		'```base',
 		'filters:',
 		'  and:',
-		'    - note.type == "item"',
-		'    - container == this.file.asLink()',
+		`    - note.${names.type} == "item"`,
+		`    - ${names.container} == this.file.asLink()`,
 		'properties:',
 		'  file.name:',
 		'    displayName: Item',
@@ -32,32 +58,25 @@ export function containerBase(): string {
 		'    name: Content',
 		'    order:',
 		'      - file.name',
-		'      - quantity',
-		'      - restock',
 		'    sort:',
 		'      - property: file.name',
 		'        direction: ASC',
 		'    cardSize: 200',
-		'    image: note.cover',
-		'  - type: table',
-		'    name: Restock',
-		'    filters:',
-		'      and:',
-		'        - restock == true',
+		options.cardImages ? `    image: note.${names.cover}` : null,
 		'```',
-	].join('\n');
+	]);
 }
 
 /** Overview of one inventory: its containers, and its items grouped by container. */
-export function inventoryBody(): string {
-	return [
+export function inventoryBody(names: PropertyNames, options: BaseOptions): string {
+	return block([
 		'# Containers',
 		'',
 		'```base',
 		'filters:',
 		'  and:',
-		'    - note.type == "container"',
-		'    - inventory == this.file.asLink()',
+		`    - note.${names.type} == "container"`,
+		`    - ${names.inventory} == this.file.asLink()`,
 		'properties:',
 		'  file.name:',
 		'    displayName: Container',
@@ -70,8 +89,8 @@ export function inventoryBody(): string {
 		'      - property: file.name',
 		'        direction: ASC',
 		'    cardSize: 200',
-		'    image: note.banner',
-		'    imageAspectRatio: 0.4',
+		options.cardImages ? `    image: note.${names.banner}` : null,
+		options.cardImages ? '    imageAspectRatio: 0.4' : null,
 		'```',
 		'',
 		'# Items',
@@ -79,8 +98,8 @@ export function inventoryBody(): string {
 		'```base',
 		'filters:',
 		'  and:',
-		'    - note.type == "item"',
-		'    - inventory == this.file.asLink()',
+		`    - note.${names.type} == "item"`,
+		`    - ${names.inventory} == this.file.asLink()`,
 		'properties:',
 		'  file.name:',
 		'    displayName: Item',
@@ -88,26 +107,16 @@ export function inventoryBody(): string {
 		'  - type: cards',
 		'    name: By container',
 		'    groupBy:',
-		'      property: container',
+		`      property: ${names.container}`,
 		'      direction: ASC',
 		'    order:',
 		'      - file.name',
-		'      - quantity',
 		'    sort:',
 		'      - property: file.name',
 		'        direction: ASC',
 		'    cardSize: 200',
-		'    image: note.cover',
-		'    imageAspectRatio: 0.4',
-		'  - type: table',
-		'    name: Restock',
-		'    filters:',
-		'      and:',
-		'        - restock == true',
-		'    order:',
-		'      - file.name',
-		'      - container',
-		'      - quantity',
+		options.cardImages ? `    image: note.${names.cover}` : null,
+		options.cardImages ? '    imageAspectRatio: 0.4' : null,
 		'```',
-	].join('\n');
+	]);
 }

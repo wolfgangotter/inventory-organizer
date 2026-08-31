@@ -31,6 +31,7 @@ export function startCreateInventory(plugin: InventoryOrganizerPlugin, active: T
 					tags: [],
 					itemFolder: folder,
 					containerFolder: folder,
+					cardImages: plugin.settings.cardImages,
 				}),
 			).then((file) => {
 				if (file) {
@@ -56,6 +57,7 @@ export function startCreateContainer(plugin: InventoryOrganizerPlugin, active: T
 						tags: config.defaultTags,
 						id: newId(),
 						defaults: config.containerDefaults,
+						cardImages: plugin.settings.cardImages,
 					}),
 				);
 			},
@@ -138,6 +140,7 @@ async function createItemIn(
 			tags: config.defaultTags,
 			id: newId(),
 			defaults: config.itemDefaults,
+			cardImages: plugin.settings.cardImages,
 		}),
 	);
 	if (file && container) await plugin.rememberContainer(container.ref.path);

@@ -50,6 +50,14 @@ describe('validateSettings', () => {
 		expect(validateSettings({ warnCrossInventory: 'no' }).warnCrossInventory).toBe(true);
 	});
 
+	it('reads the card-images toggle', () => {
+		expect(validateSettings({ cardImages: true }).cardImages).toBe(true);
+		// Anything but a boolean falls back to the default, which is off: a
+		// corrupted settings file should not start stamping properties on notes.
+		expect(validateSettings({ cardImages: 'on' }).cardImages).toBe(false);
+		expect(validateSettings({}).cardImages).toBe(false);
+	});
+
 	it('cleans the recent list', () => {
 		const recent = validateSettings({ recentContainers: ['a', 'a', '', 7, null, 'b'] }).recentContainers;
 		expect(recent).toEqual(['a', 'b']);

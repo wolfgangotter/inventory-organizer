@@ -2,7 +2,7 @@ import { PluginSettingTab, type App, type SettingDefinitionItem } from 'obsidian
 import type InventoryOrganizerPlugin from '../main';
 
 /** The boolean settings the tab exposes, and where each one lives. */
-const TOGGLES = ['showPropertyButton', 'warnCrossInventory'] as const;
+const TOGGLES = ['showPropertyButton', 'warnCrossInventory', 'cardImages'] as const;
 type ToggleKey = (typeof TOGGLES)[number];
 
 function isToggleKey(key: string): key is ToggleKey {
@@ -31,6 +31,15 @@ export class InventoryOrganizerSettingTab extends PluginSettingTab {
 					'update — the commands never depend on it.',
 				aliases: ['move', 'property', 'button'],
 				control: { type: 'toggle', key: 'showPropertyButton' },
+			},
+			{
+				name: 'Card images',
+				desc:
+					'Bind `cover` on items and `banner` on containers as the card image in the Bases ' +
+					'views new notes are created with, and seed the matching empty property so there ' +
+					'is a row to drop a picture onto. Applies to notes created from then on.',
+				aliases: ['cover', 'banner', 'image', 'card'],
+				control: { type: 'toggle', key: 'cardImages' },
 			},
 			{
 				name: 'Confirm moves between inventories',
