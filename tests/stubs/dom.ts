@@ -45,8 +45,14 @@ export function installObsidianDom(): void {
 		(g.createEl as (t: string, o?: unknown) => HTMLElement)('div', o);
 }
 
-/** A `.metadata-property` row shaped the way Obsidian renders one. */
-export function makePropertyRow(key: string): HTMLElement {
+/**
+ * A `.metadata-property` row shaped the way Obsidian renders one.
+ *
+ * `shape` is which element the value cell holds: Obsidian uses a
+ * contenteditable div for a Text property and an input elsewhere, and the
+ * folder suggester has to find either.
+ */
+export function makePropertyRow(key: string, shape: 'input' | 'contenteditable' = 'input'): HTMLElement {
 	const row = document.createElement('div');
 	row.className = 'metadata-property';
 	row.setAttribute('data-property-key', key);
@@ -55,7 +61,14 @@ export function makePropertyRow(key: string): HTMLElement {
 	keyCell.className = 'metadata-property-key';
 	const valueCell = document.createElement('div');
 	valueCell.className = 'metadata-property-value';
-	valueCell.appendChild(document.createElement('input'));
+
+	if (shape === 'input') {
+		valueCell.appendChild(document.createElement('input'));
+	} else {
+		const editable = document.createElement('div');
+		editable.setAttribute('contenteditable', 'true');
+		valueCell.appendChild(editable);
+	}
 
 	row.append(keyCell, valueCell);
 	return row;

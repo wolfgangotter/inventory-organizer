@@ -49,6 +49,7 @@ Everything above is native. The plugin covers what Obsidian leaves out:
 | **Create container**       | Fills in `inventory`, `id` and your default tags; embeds a contents Base.                                      |
 | **Create item**            | Same, and pre-fills the container when you are already looking at one.                                         |
 | **Validate inventory**     | Finds dangling containers, unplaced items, untyped notes, duplicate container names. Every row opens the note. |
+| **Set item folder**        | Picks where new items go, from the vault's folders. Same for **Set container folder**.                         |
 | **Undo last bulk move**    | Puts a bulk move back. Session only.                                                                           |
 
 Plus, outside the palette:
@@ -57,6 +58,8 @@ Plus, outside the palette:
   open the container, or take the item out of it.
 - **Bulk move** from a file-explorer multi-selection (right-click → _Move 7
   items to container_), with folders expanded.
+- **Folder autocomplete** while typing in an inventory's `item_folder` and
+  `container_folder` properties, offering the inventory's own subfolders first.
 
 ## Getting started
 
@@ -124,6 +127,12 @@ container_folder: Films/Genres
   never `./Genres` or `../Genres`. Leading `..` segments are dropped rather than
   followed, so an inventory can never write above the vault.
 - **Missing folders are created**, intermediate levels included.
+- **You do not have to type the path.** Start typing in either property and the
+  vault's folders are suggested, with the ones inside the inventory's own folder
+  first — a `Films` inventory offers `Films/Genres` before anything else that
+  happens to match. **Set item folder** and **Set container folder** in the
+  command palette do the same from a picker, and include a _Beside the inventory
+  note_ row that clears the key.
 - **Changing a folder only affects notes created afterwards.** Nothing already
   written moves. Moving those yourself in the file explorer is safe — every link
   between them is a wikilink, so Obsidian rewrites them all.
@@ -168,9 +177,12 @@ Worth knowing:
 
 ## Settings
 
-- **Button on the container property** — this is the one feature built on
+- **Button on the container property** — this is one of two features built on
   Obsidian's internal layout, so it can stop working after an update. Every
   command works without it, and you can switch it off.
+- **Folder autocomplete** — the other one. Suggests folders while you type in an
+  inventory's two folder properties. **Set item folder** and **Set container
+  folder** do the same job through supported API and never depend on it.
 - **Confirm moves between inventories** — moving an item into another
   inventory's container is allowed, but asks first.
 - **Card images** — off by default. Switched on, the Bases written into new
@@ -222,7 +234,9 @@ npm run check   # typecheck + lint + tests
 `src/core/` is pure — it imports nothing from Obsidian and holds every decision
 the plugin makes, which is why most of the test suite can run without an app.
 `src/obsidian/property-dom.ts` is the only file coupled to Obsidian's internal
-DOM, and it is written to fail soft.
+DOM, and it is written to fail soft. Everything it offers — the move button, the
+folder suggester — has a command that does the same job through public API, so a
+change to Obsidian's markup costs a convenience and never a capability.
 
 ## License
 

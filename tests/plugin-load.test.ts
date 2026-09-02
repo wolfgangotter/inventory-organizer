@@ -51,6 +51,8 @@ describe('plugin load', () => {
 			'create-inventory',
 			'create-item',
 			'move-item-to-container',
+			'set-container-folder',
+			'set-item-folder',
 			'undo-last-bulk-move',
 			'validate-inventory',
 		]);
@@ -68,6 +70,7 @@ describe('plugin load', () => {
 			'propertyNames.banner',
 			'propertyNames.cover',
 			'showPropertyButton',
+			'suggestFolders',
 			'warnCrossInventory',
 		]);
 	});

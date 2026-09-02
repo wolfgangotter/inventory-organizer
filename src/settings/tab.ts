@@ -4,7 +4,7 @@ import { takenNames } from './validate';
 import type InventoryOrganizerPlugin from '../main';
 
 /** The boolean settings the tab exposes, and where each one lives. */
-const TOGGLES = ['showPropertyButton', 'warnCrossInventory', 'cardImages'] as const;
+const TOGGLES = ['showPropertyButton', 'warnCrossInventory', 'cardImages', 'suggestFolders'] as const;
 type ToggleKey = (typeof TOGGLES)[number];
 
 /**
@@ -52,6 +52,16 @@ export class InventoryOrganizerSettingTab extends PluginSettingTab {
 					'update — the commands never depend on it.',
 				aliases: ['move', 'property', 'button'],
 				control: { type: 'toggle', key: 'showPropertyButton' },
+			},
+			{
+				name: 'Folder autocomplete',
+				desc:
+					'Suggests folders while you type in an inventory’s item folder and container ' +
+					'folder properties. Built on Obsidian’s internal layout like the button above, ' +
+					'so it can stop working after an update — the “Set item folder” and “Set ' +
+					'container folder” commands never depend on it.',
+				aliases: ['folder', 'autocomplete', 'suggest', 'path'],
+				control: { type: 'toggle', key: 'suggestFolders' },
 			},
 			{
 				name: 'Card images',

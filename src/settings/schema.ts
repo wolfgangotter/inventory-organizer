@@ -23,6 +23,16 @@ export interface InventoryOrganizerSettings {
 	 * container's block afterwards is the tedium this exists to remove.
 	 */
 	cardImages: boolean;
+	/**
+	 * Offer folder autocomplete on an inventory's `item_folder` and
+	 * `container_folder` property rows.
+	 *
+	 * Off-switchable for the same reason as `showPropertyButton`: attaching it
+	 * means finding the property editor's input in Obsidian's internal markup.
+	 * The "Set item folder" and "Set container folder" commands do the same job
+	 * through public API and need none of it.
+	 */
+	suggestFolders: boolean;
 	/** Paths of recently used containers, most recent first. Ordering only. */
 	recentContainers: string[];
 }
@@ -37,5 +47,6 @@ export const DEFAULT_SETTINGS: InventoryOrganizerSettings = {
 	// Off, so a new note carries nothing the user did not ask for. Anyone who
 	// wants pictures turns it on once and every note created afterwards has them.
 	cardImages: false,
+	suggestFolders: true,
 	recentContainers: [],
 };

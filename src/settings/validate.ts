@@ -26,6 +26,8 @@ export function validateSettings(stored: unknown): InventoryOrganizerSettings {
 				? raw.showPropertyButton
 				: DEFAULT_SETTINGS.showPropertyButton,
 		cardImages: typeof raw.cardImages === 'boolean' ? raw.cardImages : DEFAULT_SETTINGS.cardImages,
+		suggestFolders:
+			typeof raw.suggestFolders === 'boolean' ? raw.suggestFolders : DEFAULT_SETTINGS.suggestFolders,
 		recentContainers: validateRecent(raw.recentContainers),
 	};
 }
