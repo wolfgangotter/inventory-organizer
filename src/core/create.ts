@@ -1,6 +1,6 @@
 import { linkValue } from './link-format';
 import { mergeFrontmatter } from './property-defaults';
-import { containerBase, inventoryBody } from './templates';
+import { containerBase, inventoryBody, type BaseOptions } from './templates';
 import { INVENTORY_CONFIG_KEYS, type PropertyDefaults, type PropertyNames } from './schema';
 
 /**
@@ -9,19 +9,29 @@ import { INVENTORY_CONFIG_KEYS, type PropertyDefaults, type PropertyNames } from
  * Frontmatter is handed over as a plain record and written by Obsidian's
  * `processFrontMatter`, never serialised here - the plugin has one YAML writer
  * and this is not it.
+ *
+ * A new note carries only what makes it a member of its inventory: the type,
+ * the links, an id and the tags. Nothing else is guessed. An earlier version
+ * seeded `quantity`, `restock` and an empty `cover` on every item, which is
+ * fine for a bin of brake cables and noise for a film collection - and because
+ * a seed is written before the inventory's declaration is read, there was no
+ * way for the user to take one back. Anything an inventory wants on its notes
+ * it declares in `item_defaults` / `container_defaults`; see
+ * `core/property-defaults`. The single exception is the card image, which is a
+ * plugin setting because the views that bind it are generated here too.
  */
 export interface NewNoteSpec {
 	frontmatter: Record<string, unknown>;
 	body: string;
 }
 
-export interface NewInventoryOptions {
+export interface NewInventoryOptions extends BaseOptions {
 	tags: string[];
 	itemFolder: string | null;
 	containerFolder: string | null;
 }
 
-export interface NewContainerOptions {
+export interface NewContainerOptions extends BaseOptions {
 	/** Linktext of the inventory root, produced by Obsidian. */
 	inventoryLinktext: string;
 	tags: string[];
@@ -35,14 +45,22 @@ export interface NewItemOptions extends NewContainerOptions {
 	containerLinktext: string | null;
 }
 
+/**
+ * The one seed left, and only when the card images setting is on: the views
+ * about to be written bind this property, so the note gets the row to drop a
+ * picture onto. Switched off, the key is not written at all.
+ */
+function imageSeed(property: string, options: BaseOptions): Record<string, unknown> {
+	return options.cardImages ? { [property]: '' } : {};
+}
+
 export function newInventory(names: PropertyNames, options: NewInventoryOptions): NewNoteSpec {
 	// An inventory root takes no declared defaults: it is the note that declares
 	// them, and stamping an inventory with its own item fields makes no sense.
+	// It gets no banner either - none of the two views below render the root's
+	// own image, so the row would be a property nothing reads.
 	const frontmatter: Record<string, unknown> = {
 		[names.type]: 'inventory',
-		// Empty so the row is visible in the property editor and the overview
-		// views have something to bind; the user drops an image on it.
-		[names.banner]: '',
 		[INVENTORY_CONFIG_KEYS.defaultTags]: [...options.tags],
 	};
 	// Folder keys are omitted rather than written as null: an absent key reads
@@ -52,15 +70,15 @@ export function newInventory(names: PropertyNames, options: NewInventoryOptions)
 		frontmatter[INVENTORY_CONFIG_KEYS.containerFolder] = options.containerFolder;
 	}
 
-	return { frontmatter, body: inventoryBody() };
+	return { frontmatter, body: inventoryBody(names, options) };
 }
 
 export function newContainer(names: PropertyNames, options: NewContainerOptions): NewNoteSpec {
 	return {
 		frontmatter: mergeFrontmatter(
-			// Seeds: overridable starting values. The inventory's own declaration
-			// wins over these, which is how a container gets a placeholder banner.
-			{ [names.banner]: '' },
+			// The inventory's own declaration still wins over the seeded banner,
+			// which is how a container gets a placeholder image instead of a blank.
+			imageSeed(names.banner, options),
 			options.defaults,
 			{
 				[names.type]: 'container',
@@ -69,7 +87,7 @@ export function newContainer(names: PropertyNames, options: NewContainerOptions)
 				tags: [...options.tags],
 			},
 		),
-		body: containerBase(),
+		body: containerBase(names, options),
 	};
 }
 
@@ -85,14 +103,7 @@ export function newItem(names: PropertyNames, options: NewItemOptions): NewNoteS
 	}
 
 	return {
-		frontmatter: mergeFrontmatter(
-			// Sensible starting values so the Bases views have something to show
-			// and the restock filter works from the first note. All overridable:
-			// an inventory that counts in kilograms starts elsewhere than 1.
-			{ [names.quantity]: 1, [names.restock]: false, [names.cover]: '' },
-			options.defaults,
-			structural,
-		),
+		frontmatter: mergeFrontmatter(imageSeed(names.cover, options), options.defaults, structural),
 		body: '',
 	};
 }

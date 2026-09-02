@@ -34,18 +34,20 @@ export interface PropertyNames {
 	container: string;
 	/** Durable external key. Written on creation, never read by this plugin. */
 	id: string;
-	quantity: string;
-	restock: string;
-	/** Wide header image, on inventory roots and containers. Bound by the Bases views. */
+	/**
+	 * Card image of a container. Written and bound by the generated views only
+	 * when the card images setting is on, and configurable because `banner` is
+	 * a name several themes and plugins have already claimed.
+	 */
 	banner: string;
-	/** Card image, on items. Bound by the Bases views. */
+	/** Card image of an item. Same story as `banner`. */
 	cover: string;
 }
 
 /**
  * The properties the model is built on, which a per-inventory declaration may
- * never redeclare - see `core/property-defaults`. Everything else, including
- * `quantity`, `banner` and `cover`, is an ordinary value the user may seed.
+ * never redeclare - see `core/property-defaults`. Everything else, `banner` and
+ * `cover` included, is an ordinary value the user may seed.
  */
 export const RESERVED_PROPERTY_KEYS: readonly (keyof PropertyNames)[] = [
 	'type',
@@ -59,11 +61,53 @@ export const DEFAULT_PROPERTY_NAMES: PropertyNames = {
 	inventory: 'inventory',
 	container: 'container',
 	id: 'id',
-	quantity: 'quantity',
-	restock: 'restock',
 	banner: 'banner',
 	cover: 'cover',
 };
+
+/**
+ * Also written on every note the plugin creates, so a property may not be
+ * renamed onto it. Not part of `PropertyNames` because it is Obsidian's, not
+ * ours - the user's tags simply live there.
+ */
+export const RESERVED_TAG_KEY = 'tags';
+
+/**
+ * What a property name may look like.
+ *
+ * Stricter than Obsidian, which is happy with `item image` or `item-image`.
+ * These names are interpolated into the generated Bases blocks, and there a
+ * space ends the identifier while a hyphen reads as subtraction: `note.item-image`
+ * resolves to `note.item` minus `image` and the view silently shows nothing.
+ * Letters, digits and underscores round-trip through YAML keys and Bases
+ * expressions alike, so that is the set.
+ */
+const PROPERTY_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/** Long enough for any readable name, short enough to still be one. */
+const MAX_PROPERTY_NAME_LENGTH = 64;
+
+/**
+ * Why `name` cannot be used as a property name, or null if it can.
+ *
+ * The message is written to be shown to the user under the settings field, so
+ * it says what to do rather than what was violated. `taken` is the set of names
+ * already spoken for - two properties sharing a name would have one silently
+ * overwrite the other on every note created afterwards.
+ */
+export function propertyNameProblem(name: string, taken: Iterable<string> = []): string | null {
+	if (!name) return 'Enter a property name.';
+	if (name.length > MAX_PROPERTY_NAME_LENGTH) {
+		return `Use at most ${MAX_PROPERTY_NAME_LENGTH} characters.`;
+	}
+	if (!PROPERTY_NAME_PATTERN.test(name)) {
+		return 'Use letters, digits and underscores only, starting with a letter — a space or hyphen breaks the generated Bases views.';
+	}
+	for (const other of taken) {
+		if (other === name) return 'Another property already uses this name.';
+	}
+	return null;
+}
 
 /**
  * What a user-declared default property is allowed to hold.

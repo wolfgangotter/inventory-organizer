@@ -12,17 +12,34 @@
  *     .metadata-property[data-property-key="container"]
  *       .metadata-property-key
  *       .metadata-property-value
+ *         input | [contenteditable]     ← the folder suggester attaches here
+ *
+ * Two things hang off this: the move button on an item's container row, and
+ * folder autocomplete on an inventory's two folder rows. `AbstractInputSuggest`
+ * is itself public API and documented to take a contenteditable div; only
+ * reaching that div is not.
  */
 
 import { Component, MarkdownView, debounce, TFile, type App } from 'obsidian';
+import { INVENTORY_CONFIG_KEYS } from '../core/schema';
+import { folderOf } from '../core/naming';
 import { BUTTON_CLASS, createMoveButton, type ButtonTarget } from '../ui/move-button';
+import { FolderSuggest } from '../ui/folder-suggest';
+import { applyFolder, vaultFolders, type FolderKind } from '../triggers/set-folder';
 import type InventoryOrganizerPlugin from '../main';
 
 const PROPERTY_ROW = '.metadata-property';
 const METADATA_CONTAINER = '.metadata-container';
 const KEY_ATTRIBUTE = 'data-property-key';
 const VALUE_CELL = '.metadata-property-value';
+const VALUE_INPUT = `${VALUE_CELL} input, ${VALUE_CELL} [contenteditable="true"]`;
 const RESCAN_DELAY_MS = 150;
+
+/** The inventory-root property rows that get folder autocomplete. */
+const FOLDER_ROWS: Record<string, FolderKind> = {
+	[INVENTORY_CONFIG_KEYS.itemFolder]: 'item',
+	[INVENTORY_CONFIG_KEYS.containerFolder]: 'container',
+};
 
 /** Key of a property row, tolerating the attribute living on a descendant. */
 export function propertyKeyOf(row: HTMLElement): string | null {
@@ -37,6 +54,15 @@ export class PropertyDomAdapter extends Component {
 	private warned = false;
 	/** What the current decorations were built from, so refresh can no-op. */
 	private signature = '';
+	/**
+	 * Suggesters by the element they are attached to, so a rescan re-uses one
+	 * rather than stacking a second dropdown on the same field.
+	 *
+	 * `AbstractInputSuggest` has no public detach, so a suggester is dropped by
+	 * closing it and forgetting the element - which Obsidian discards on the
+	 * next re-render anyway, taking the listeners with it.
+	 */
+	private suggests = new Map<HTMLElement, FolderSuggest>();
 
 	constructor(private readonly plugin: InventoryOrganizerPlugin) {
 		super();
@@ -115,7 +141,11 @@ export class PropertyDomAdapter extends Component {
 
 	private decorationSignature(): string {
 		const settings = this.plugin.settings;
-		return JSON.stringify([settings.showPropertyButton, settings.propertyNames.container]);
+		return JSON.stringify([
+			settings.showPropertyButton,
+			settings.suggestFolders,
+			settings.propertyNames.container,
+		]);
 	}
 
 	/**
@@ -133,13 +163,32 @@ export class PropertyDomAdapter extends Component {
 				el.remove();
 			});
 		}
+		this.dropSuggests(() => true);
+	}
+
+	/** Closes and forgets every suggester matching `predicate`. */
+	private dropSuggests(predicate: (element: HTMLElement) => boolean): void {
+		for (const [element, suggest] of this.suggests) {
+			if (!predicate(element)) continue;
+			try {
+				suggest.close();
+			} catch (err) {
+				console.error('[inventory-organizer] could not close a folder suggester', err);
+			}
+			this.suggests.delete(element);
+		}
 	}
 
 	private decorateAll(): void {
-		if (!this.plugin.settings.showPropertyButton) {
+		const settings = this.plugin.settings;
+		if (!settings.showPropertyButton && !settings.suggestFolders) {
 			this.removeAll();
 			return;
 		}
+
+		// A property row Obsidian has re-rendered leaves its suggester attached
+		// to an element nothing can reach any more.
+		this.dropSuggests((element) => !element.isConnected);
 
 		for (const leaf of this.app.workspace.getLeavesOfType('markdown')) {
 			const view = leaf.view;
@@ -148,16 +197,58 @@ export class PropertyDomAdapter extends Component {
 			const rows = view.contentEl.querySelectorAll(PROPERTY_ROW);
 			if (rows.length === 0) continue;
 
-			// Decorating a row means asking whether the note is an item, so the
+			// Decorating a row means asking what kind of note this is, so the
 			// answer is fetched once per view rather than once per row.
-			const isItem = this.plugin.index.noteFor(view.file).kind === 'item';
-			const notePath = view.file.path;
+			const note = this.plugin.index.noteFor(view.file);
+			const file = view.file;
 
 			rows.forEach((node) => {
-				if (node.instanceOf(HTMLElement)) this.decorateRow(node, notePath, isItem);
+				if (!node.instanceOf(HTMLElement)) return;
+				this.decorateRow(node, file.path, note.kind === 'item');
+				this.suggestFolders(node, file, note.kind === 'inventory');
 			});
 		}
 		this.warnOnceIfStructureMissing();
+	}
+
+	/**
+	 * Attaches folder autocomplete to an inventory's folder rows.
+	 *
+	 * The picked folder is written to the file rather than into the field: the
+	 * row is a contenteditable whose commit path belongs to Obsidian, and
+	 * writing the note is the one route that cannot leave the two disagreeing.
+	 */
+	private suggestFolders(row: HTMLElement, file: TFile, isInventory: boolean): void {
+		const key = propertyKeyOf(row);
+		const kind = key ? FOLDER_ROWS[key] : undefined;
+		const element = row.querySelector(VALUE_INPUT);
+
+		if (!this.plugin.settings.suggestFolders || !isInventory || !kind || !element) {
+			// The row may have been decorated before the settings changed, or
+			// Obsidian may have reused the node for a different property.
+			this.dropSuggests((attached) => row.contains(attached));
+			return;
+		}
+
+		// `AbstractInputSuggest` takes an input or a contenteditable div, and
+		// nothing else; a future Obsidian rendering the value differently gets
+		// no suggester rather than a thrown constructor.
+		if (!element.instanceOf(HTMLInputElement) && !element.instanceOf(HTMLDivElement)) return;
+		if (this.suggests.has(element)) return;
+
+		const notePath = file.path;
+		this.suggests.set(
+			element,
+			new FolderSuggest(
+				this.app,
+				element,
+				() => vaultFolders(this.plugin),
+				() => folderOf(notePath),
+				(folder) => {
+					void applyFolder(this.plugin, this.plugin.index.noteFor(file), kind, folder);
+				},
+			),
+		);
 	}
 
 	private decorateRow(row: HTMLElement, notePath: string, isItem: boolean): void {
@@ -166,8 +257,10 @@ export class PropertyDomAdapter extends Component {
 		const existing = row.querySelector(`.${BUTTON_CLASS}`);
 
 		// Settings may have changed since this row was decorated, or Obsidian may
-		// have reused the node for a different property.
-		if (!isItem || key !== wanted) {
+		// have reused the node for a different property. Switching the button off
+		// takes this branch too, so an existing one is cleared rather than left
+		// behind by the sweep that no longer wants it.
+		if (!this.plugin.settings.showPropertyButton || !isItem || key !== wanted) {
 			existing?.remove();
 			return;
 		}

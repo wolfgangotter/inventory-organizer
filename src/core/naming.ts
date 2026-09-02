@@ -81,6 +81,24 @@ export function sanitizeFileName(raw: string): string | null {
 	return name || null;
 }
 
+/** The folder part of a vault path, or null for a note at the vault root. */
+export function folderOf(path: string): string | null {
+	const folder = path.split('/').slice(0, -1).join('/');
+	return folder || null;
+}
+
+/**
+ * Where a new member of an inventory is written.
+ *
+ * The declared folder when there is one, and otherwise the folder the inventory
+ * note itself sits in. That fallback is the documented behaviour rather than an
+ * implementation detail: deleting `container_folder` means "next to the
+ * inventory", not "at the vault root", which is what a plain null would give.
+ */
+export function memberFolder(declared: string | null, inventoryPath: string): string | null {
+	return declared ?? folderOf(inventoryPath);
+}
+
 /** Joins a folder and file name into a vault-relative path. */
 export function joinPath(folder: string | null, fileName: string): string {
 	const clean = (folder ?? '').replace(/^\/+/, '').replace(/\/+$/, '').trim();

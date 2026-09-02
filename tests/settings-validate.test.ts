@@ -1,6 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { validateSettings } from '../src/settings/validate';
 import { DEFAULT_SETTINGS } from '../src/settings/schema';
+
+/**
+ * A refused property name is reported to the console on purpose - silencing it
+ * here keeps a passing run quiet without hiding that it happens.
+ */
+const warnings = () => vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
 
 describe('validateSettings', () => {
 	it('returns defaults for nothing at all', () => {
@@ -30,6 +40,7 @@ describe('validateSettings', () => {
 	});
 
 	it('ignores a blank or non-string property name', () => {
+		warnings();
 		// A blank name would silently disable the property, which is far more
 		// confusing than falling back.
 		expect(validateSettings({ propertyNames: { container: '   ' } }).propertyNames.container).toBe(
@@ -40,6 +51,42 @@ describe('validateSettings', () => {
 		);
 	});
 
+	it('refuses a stored name the generated Bases could not read', () => {
+		// Only reachable from a hand-edited or downgraded data.json - the field
+		// rejects these before they are persisted. It still has to be caught:
+		// `image: note.item-image` reads as a subtraction and matches nothing.
+		const warned = warnings();
+		const names = validateSettings({
+			propertyNames: { cover: 'item image', banner: 'item-image' },
+		}).propertyNames;
+
+		expect(names.cover).toBe('cover');
+		expect(names.banner).toBe('banner');
+		expect(warned).toHaveBeenCalledTimes(2);
+	});
+
+	it('refuses a stored name that collides with another property', () => {
+		warnings();
+		// Two properties under one name means one overwrites the other on every
+		// note created afterwards; `tags` is written on every note too.
+		expect(validateSettings({ propertyNames: { cover: 'container' } }).propertyNames.cover).toBe(
+			'cover',
+		);
+		expect(validateSettings({ propertyNames: { banner: 'tags' } }).propertyNames.banner).toBe(
+			'banner',
+		);
+	});
+
+	it('allows a pair of names to be swapped around', () => {
+		// Renaming banner out of the way first frees the name for cover; the
+		// check looks at what is taken now, not at what the defaults were.
+		const names = validateSettings({
+			propertyNames: { banner: 'header', cover: 'banner' },
+		}).propertyNames;
+		expect(names.banner).toBe('header');
+		expect(names.cover).toBe('banner');
+	});
+
 	it('reads the property-button toggle', () => {
 		expect(validateSettings({ showPropertyButton: false }).showPropertyButton).toBe(false);
 		expect(validateSettings({ showPropertyButton: 'yes' }).showPropertyButton).toBe(true);
@@ -48,6 +95,14 @@ describe('validateSettings', () => {
 	it('reads the cross-inventory toggle', () => {
 		expect(validateSettings({ warnCrossInventory: false }).warnCrossInventory).toBe(false);
 		expect(validateSettings({ warnCrossInventory: 'no' }).warnCrossInventory).toBe(true);
+	});
+
+	it('reads the card-images toggle', () => {
+		expect(validateSettings({ cardImages: true }).cardImages).toBe(true);
+		// Anything but a boolean falls back to the default, which is off: a
+		// corrupted settings file should not start stamping properties on notes.
+		expect(validateSettings({ cardImages: 'on' }).cardImages).toBe(false);
+		expect(validateSettings({}).cardImages).toBe(false);
 	});
 
 	it('cleans the recent list', () => {

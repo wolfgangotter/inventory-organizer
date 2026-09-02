@@ -2,6 +2,7 @@ import { MarkdownView } from 'obsidian';
 import { undoLastBulkMove } from './bulk-move';
 import { startCreateContainer, startCreateInventory, startCreateItem } from './create';
 import { startMove } from './move';
+import { startSetFolder } from './set-folder';
 import { startValidate } from './validate';
 import type InventoryOrganizerPlugin from '../main';
 
@@ -64,6 +65,25 @@ export function registerCommands(plugin: InventoryOrganizerPlugin): void {
 		name: 'Create item',
 		callback: () => {
 			startCreateItem(plugin, activeFile());
+		},
+	});
+
+	// The public-API route to the two folder settings. The suggester on the
+	// property row does the same job but reads Obsidian's internal markup, so it
+	// can stop working; these cannot.
+	plugin.addCommand({
+		id: 'set-item-folder',
+		name: 'Set item folder',
+		callback: () => {
+			startSetFolder(plugin, activeFile(), 'item');
+		},
+	});
+
+	plugin.addCommand({
+		id: 'set-container-folder',
+		name: 'Set container folder',
+		callback: () => {
+			startSetFolder(plugin, activeFile(), 'container');
 		},
 	});
 

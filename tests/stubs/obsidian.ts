@@ -257,6 +257,41 @@ export class SettingTab {
 
 export class PluginSettingTab extends SettingTab {}
 
+/**
+ * Enough of `AbstractInputSuggest` for the plugin to construct one.
+ *
+ * The real class binds listeners to the element and renders a popover; none of
+ * that is what these tests are about, and the ranking it would display is
+ * covered directly in `folders.test.ts`. Recording the element is what lets a
+ * test see that a suggester was attached to the right row.
+ */
+export abstract class AbstractInputSuggest<T> {
+	limit = 100;
+	closed = false;
+
+	constructor(
+		public app: unknown,
+		public textInputEl: HTMLElement,
+	) {}
+
+	protected abstract getSuggestions(query: string): T[] | Promise<T[]>;
+	abstract renderSuggestion(value: T, el: HTMLElement): void;
+	selectSuggestion(_value: T, _evt?: unknown): void {}
+	open(): void {
+		this.closed = false;
+	}
+	close(): void {
+		this.closed = true;
+	}
+	setValue(_value: string): void {}
+	getValue(): string {
+		return '';
+	}
+	onSelect(_cb: (value: T, evt: unknown) => unknown): this {
+		return this;
+	}
+}
+
 export class Plugin extends Component {
 	commands: { id: string; name: string }[] = [];
 	settingTabs: unknown[] = [];
@@ -328,6 +363,7 @@ export interface MockApp {
 		getMarkdownFiles: () => TFile[];
 		getFileByPath: (path: string) => TFile | null;
 		getFolderByPath: () => TFolder | null;
+		getAllFolders: (includeRoot?: boolean) => TFolder[];
 		getAbstractFileByPath: () => TAbstractFile | null;
 		create: () => Promise<TFile>;
 		createFolder: () => Promise<TFolder>;
@@ -340,7 +376,10 @@ export interface MockApp {
 		getFirstLinkpathDest: () => TFile | null;
 	};
 	fileManager: {
-		processFrontMatter: () => Promise<void>;
+		/** Runs `fn` against `frontmatter`, as Obsidian's read-modify-write does. */
+		processFrontMatter: (file: TFile, fn: (frontmatter: Record<string, unknown>) => void) => Promise<void>;
+		/** What the last processFrontMatter call left behind, for assertions. */
+		frontmatter: Record<string, unknown>;
 		trashFile: () => Promise<void>;
 	};
 }
@@ -363,6 +402,7 @@ export function createMockApp(): MockApp {
 			getMarkdownFiles: () => [],
 			getFileByPath: () => null,
 			getFolderByPath: () => null,
+			getAllFolders: () => [],
 			getAbstractFileByPath: () => null,
 			create: async () => new TFile(),
 			createFolder: async () => new TFolder(),
@@ -375,7 +415,10 @@ export function createMockApp(): MockApp {
 			getFirstLinkpathDest: () => null,
 		},
 		fileManager: {
-			processFrontMatter: async () => {},
+			frontmatter: {},
+			async processFrontMatter(_file, fn) {
+				fn(this.frontmatter);
+			},
 			trashFile: async () => {},
 		},
 	};

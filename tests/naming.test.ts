@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { joinPath, sanitizeFileName, uniquePath } from '../src/core/naming';
+import { folderOf, joinPath, memberFolder, sanitizeFileName, uniquePath } from '../src/core/naming';
 
 describe('sanitizeFileName', () => {
 	it('keeps an ordinary title unchanged', () => {
@@ -84,5 +84,44 @@ describe('uniquePath', () => {
 		const taken = new Set(['Inv/Box.md']);
 		const result = uniquePath('Inv', 'Box', (p) => taken.has(p));
 		expect(taken.has(result)).toBe(false);
+	});
+});
+
+describe('folderOf', () => {
+	it('returns the containing folder', () => {
+		expect(folderOf('Films/Genres/Heat.md')).toBe('Films/Genres');
+	});
+
+	it('returns null for a note at the vault root', () => {
+		// null rather than '' so `joinPath` writes `Heat.md`, not `/Heat.md`.
+		expect(folderOf('Heat.md')).toBeNull();
+	});
+});
+
+describe('memberFolder', () => {
+	/**
+	 * The documented fallback: an inventory with no `item_folder` writes next to
+	 * itself, not at the vault root. Worth its own test because the difference
+	 * only shows up once notes start landing in the wrong place.
+	 */
+	it('uses the declared folder when there is one', () => {
+		expect(memberFolder('Films/Individual Movies', 'Films/Films.md')).toBe(
+			'Films/Individual Movies',
+		);
+	});
+
+	it('falls back to the folder the inventory sits in', () => {
+		expect(memberFolder(null, 'Films/Films.md')).toBe('Films');
+		expect(memberFolder(null, 'A/B/C/Inv.md')).toBe('A/B/C');
+	});
+
+	it('falls back to the vault root for an inventory at the vault root', () => {
+		expect(memberFolder(null, 'Films.md')).toBeNull();
+	});
+
+	it('lets a declared folder point outside the inventory folder', () => {
+		// Nothing requires members to live under the inventory; `readInventoryConfig`
+		// has already stripped anything that would escape the vault.
+		expect(memberFolder('Archive', 'Films/Films.md')).toBe('Archive');
 	});
 });
