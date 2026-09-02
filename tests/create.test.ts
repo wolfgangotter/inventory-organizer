@@ -42,6 +42,22 @@ describe('newInventory', () => {
 		});
 	});
 
+	it('writes the container folder before the item folder', () => {
+		// Insertion order is what `processFrontMatter` serialises, so this is the
+		// order of the rows in the note - containers first, matching the order
+		// they are created in and the fact that a container holds items.
+		const spec = newInventory(
+			names,
+			inventoryOptions({ itemFolder: 'Films/Movies', containerFolder: 'Films/Genres' }),
+		);
+		expect(Object.keys(spec.frontmatter)).toEqual([
+			'type',
+			'default_tags',
+			'container_folder',
+			'item_folder',
+		]);
+	});
+
 	it('omits folder keys rather than writing null', () => {
 		// An absent key reads as "no preference"; an explicit null looks broken.
 		const spec = newInventory(names, inventoryOptions());

@@ -138,9 +138,10 @@ export interface InventoryConfig {
 	containerDefaults: PropertyDefaults;
 }
 
+/** Listed in the order a new inventory root writes them. */
 export const INVENTORY_CONFIG_KEYS = {
-	itemFolder: 'item_folder',
 	containerFolder: 'container_folder',
+	itemFolder: 'item_folder',
 	defaultTags: 'default_tags',
 	itemDefaults: 'item_defaults',
 	containerDefaults: 'container_defaults',

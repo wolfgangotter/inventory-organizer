@@ -63,12 +63,17 @@ export function newInventory(names: PropertyNames, options: NewInventoryOptions)
 		[names.type]: 'inventory',
 		[INVENTORY_CONFIG_KEYS.defaultTags]: [...options.tags],
 	};
+	// Containers before items, matching the order they are created in and the
+	// shape of the model - a container holds items, so it reads as the outer
+	// thing. Insertion order is what `processFrontMatter` serialises, so this
+	// line order is the order of the rows in the note.
+	//
 	// Folder keys are omitted rather than written as null: an absent key reads
 	// as "no preference", where an explicit null looks like a broken setting.
-	if (options.itemFolder) frontmatter[INVENTORY_CONFIG_KEYS.itemFolder] = options.itemFolder;
 	if (options.containerFolder) {
 		frontmatter[INVENTORY_CONFIG_KEYS.containerFolder] = options.containerFolder;
 	}
+	if (options.itemFolder) frontmatter[INVENTORY_CONFIG_KEYS.itemFolder] = options.itemFolder;
 
 	return { frontmatter, body: inventoryBody(names, options) };
 }

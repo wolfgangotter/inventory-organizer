@@ -58,8 +58,8 @@ Plus, outside the palette:
   open the container, or take the item out of it.
 - **Bulk move** from a file-explorer multi-selection (right-click → _Move 7
   items to container_), with folders expanded.
-- **Folder autocomplete** while typing in an inventory's `item_folder` and
-  `container_folder` properties, offering the inventory's own subfolders first.
+- **Folder autocomplete** while typing in an inventory's `container_folder` and
+  `item_folder` properties, offering the inventory's own subfolders first.
 
 ## Getting started
 
@@ -82,7 +82,7 @@ your items grouped by container.
 | `container`                                       | items             | Link to the containing container.                                            |
 | `cover`, `banner`                                 | items, containers | Card image, written only with **Card images** on. See [Settings](#settings). |
 | `id`                                              | items, containers | A durable key for exporting elsewhere. **Nothing in the plugin reads it.**   |
-| `item_folder`, `container_folder`, `default_tags` | inventory         | Where new notes go and what tags they get.                                   |
+| `container_folder`, `item_folder`, `default_tags` | inventory         | Where new notes go and what tags they get.                                   |
 | `item_defaults`, `container_defaults`             | inventory         | Extra properties to stamp on new notes — see below.                          |
 
 That really is the whole list. A new note gets its type, its links, an id and
@@ -108,15 +108,15 @@ hyphen reads as subtraction — `note.item-image` resolves to `note.item` minus
 
 ### Where new notes go
 
-`item_folder` and `container_folder` on the inventory root decide where its
-items and containers are created. **Create inventory** pre-fills both with the
+`container_folder` and `item_folder` on the inventory root decide where its
+containers and items are created. **Create inventory** pre-fills both with the
 folder the inventory itself landed in, so a `Films` inventory created in `Films`
 keeps everything together without you touching anything.
 
 ```yaml
 type: inventory
-item_folder: Films/Individual Movies
 container_folder: Films/Genres
+item_folder: Films/Individual Movies
 ```
 
 - **Leave a key out and new notes land next to the inventory note.** Deleting
