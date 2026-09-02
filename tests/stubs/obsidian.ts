@@ -268,6 +268,15 @@ export class PluginSettingTab extends SettingTab {}
 export abstract class AbstractInputSuggest<T> {
 	limit = 100;
 	closed = false;
+	value = '';
+	/**
+	 * What was called on this suggester, in order.
+	 *
+	 * The order is the whole point of the selection path: filling the field and
+	 * dropping focus have to happen before anything writes the note, or the
+	 * re-render reopens the dropdown under the user.
+	 */
+	calls: string[] = [];
 
 	constructor(
 		public app: unknown,
@@ -279,13 +288,18 @@ export abstract class AbstractInputSuggest<T> {
 	selectSuggestion(_value: T, _evt?: unknown): void {}
 	open(): void {
 		this.closed = false;
+		this.calls.push('open');
 	}
 	close(): void {
 		this.closed = true;
+		this.calls.push('close');
 	}
-	setValue(_value: string): void {}
+	setValue(value: string): void {
+		this.value = value;
+		this.calls.push('setValue');
+	}
 	getValue(): string {
-		return '';
+		return this.value;
 	}
 	onSelect(_cb: (value: T, evt: unknown) => unknown): this {
 		return this;

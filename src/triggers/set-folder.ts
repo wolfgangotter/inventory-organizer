@@ -81,6 +81,10 @@ export async function applyFolder(
 		return;
 	}
 
+	// Written unconditionally, even when it looks unchanged. `configFor` reads
+	// the metadata cache, which lags the file after an edit, so skipping on a
+	// match would sometimes skip a write that was needed - and a pick that
+	// silently does nothing is a worse bug than a redundant write.
 	try {
 		// A null value removes the property; see `FrontmatterWriter.apply`.
 		await plugin.frontmatter.apply(file, { set: { [CONFIG_KEY[kind]]: folder } });

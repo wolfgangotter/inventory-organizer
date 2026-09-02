@@ -180,7 +180,7 @@ describe('folder autocomplete', () => {
 		const { plugin } = await load({ noteName: 'Films.md' });
 		const suggest = suggestFor(plugin, INVENTORY_CONFIG_KEYS.itemFolder);
 		// Nothing is local, so match quality alone decides.
-		expect(suggest.getSuggestions('archive')).toEqual(['Archive']);
+		expect(suggest.getSuggestions('archiv')).toEqual(['Archive']);
 	});
 
 	it('leaves nothing attached after unload', async () => {

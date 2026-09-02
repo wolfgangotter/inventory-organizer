@@ -34,6 +34,17 @@ function matchOf(folder: string, query: string): Match {
 	return Match.None;
 }
 
+/**
+ * One folder path, as the ranking compares them.
+ *
+ * A trailing slash is dropped so `Films/Genres` and `Films/Genres/` cannot both
+ * be offered - two rows that read as the same folder, one of which is a typo
+ * waiting to be written into a note.
+ */
+function normalizeFolder(folder: string): string {
+	return folder.replace(/\/+$/, '');
+}
+
 /** Whether `folder` is `home` or sits inside it. */
 export function isUnder(folder: string, home: string | null): boolean {
 	if (home === null) return false;
@@ -66,10 +77,28 @@ export function rankFolders(
 	home: string | null,
 	limit = MAX_FOLDER_SUGGESTIONS,
 ): string[] {
-	const needle = normalizeQuery(query);
+	const seen = new Set<string>();
+	const candidates: string[] = [];
+	for (const raw of folders) {
+		const folder = normalizeFolder(raw);
+		// A blank is the vault root, which no folder property can express.
+		if (!folder || seen.has(folder)) continue;
+		seen.add(folder);
+		candidates.push(folder);
+	}
+
+	const typed = normalizeQuery(query);
+	/*
+	 * A query that already names a folder exactly is a finished answer, not a
+	 * filter. Narrowing to that folder and its descendants is how re-opening the
+	 * dropdown on a field that is already set used to become a dead end: the
+	 * only rows on offer were the value you were trying to change and whatever
+	 * sat beneath it. Everything stays on offer instead, ranked as usual.
+	 */
+	const needle = candidates.some((folder) => folder.toLowerCase() === typed) ? '' : typed;
 
 	const scored: { folder: string; match: Match; local: boolean }[] = [];
-	for (const folder of folders) {
+	for (const folder of candidates) {
 		const match = matchOf(folder, needle);
 		if (match === Match.None) continue;
 		scored.push({ folder, match, local: isUnder(folder, home) });

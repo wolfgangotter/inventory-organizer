@@ -52,12 +52,47 @@ describe('rankFolders', () => {
 		]);
 	});
 
-	it('ignores case, padding and a trailing slash', () => {
-		// All three are what a person actually types into the field.
+	it('ignores case and padding', () => {
+		// Both are what a person actually types into the field.
 		const expected = ['Films/Genres', 'Films/Genres/Individual Movies'];
 		expect(rankFolders(vault, 'films/gen', 'Films')).toEqual(expected);
 		expect(rankFolders(vault, '  Films/Gen  ', 'Films')).toEqual(expected);
-		expect(rankFolders(vault, 'Films/Genres/', 'Films')).toEqual(expected);
+	});
+
+	it('drops a trailing slash rather than treating it as another folder', () => {
+		// `Films/Genres/` names the same folder as `Films/Genres`, so it is an
+		// exact match and stops filtering - not a near-miss with its own list.
+		expect(rankFolders(vault, 'Films/Genres/', 'Films')).toEqual(
+			rankFolders(vault, 'Films/Genres', 'Films'),
+		);
+	});
+
+	it('never offers the same folder twice over a trailing slash', () => {
+		// Two rows reading as one folder, one of them a typo waiting to be
+		// written into a note.
+		expect(rankFolders(['Films/Genres', 'Films/Genres/'], '', null)).toEqual(['Films/Genres']);
+	});
+
+	it('ignores a blank path, which no folder property can express', () => {
+		expect(rankFolders(['', '/', 'Films'], '', null)).toEqual(['Films']);
+	});
+
+	describe('a query that already names a folder', () => {
+		/**
+		 * Re-opening the dropdown on a field that is already set used to be a
+		 * dead end: the value was an exact match, so the only rows on offer were
+		 * that folder and whatever sat beneath it - never the folder elsewhere
+		 * you opened the list to switch to.
+		 */
+		it('stops filtering, so every other folder stays reachable', () => {
+			expect(rankFolders(vault, 'Archive', 'Films')).toEqual(rankFolders(vault, '', 'Films'));
+		});
+
+		it('still narrows while the name is only partly typed', () => {
+			// `Archiv` names nothing, so it filters as usual - the escape hatch
+			// opens on the exact match, not on the way to it.
+			expect(rankFolders(vault, 'Archiv', 'Films')).toEqual(['Archive', 'Archive/Generated']);
+		});
 	});
 
 	it('matches a segment anywhere in the path', () => {

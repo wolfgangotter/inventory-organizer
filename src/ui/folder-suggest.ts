@@ -8,16 +8,11 @@ import { rankFolders } from '../core/folders';
  * contenteditable div, which is what Obsidian renders a Text property as - but
  * *finding* that div is not public, so the attaching lives in
  * `obsidian/property-dom` with the rest of the internal-DOM code and fails soft.
- *
- * Picking a folder writes the frontmatter rather than the input element. The
- * property row is a contenteditable whose commit path is Obsidian's business;
- * writing the file and letting the row re-render from it is the one route that
- * cannot leave the note and the field disagreeing.
  */
 export class FolderSuggest extends AbstractInputSuggest<string> {
 	constructor(
 		app: App,
-		element: HTMLInputElement | HTMLDivElement,
+		private readonly element: HTMLInputElement | HTMLDivElement,
 		private readonly folders: () => string[],
 		/** Folder of the inventory note, whose contents are offered first. */
 		private readonly home: () => string | null,
@@ -34,8 +29,23 @@ export class FolderSuggest extends AbstractInputSuggest<string> {
 		el.setText(folder);
 	}
 
+	/**
+	 * Takes the pick, in an order that matters.
+	 *
+	 * The first version closed the popover and wrote the frontmatter, leaving
+	 * the field holding the half-typed query and still focused. Writing the note
+	 * re-renders the property row underneath that focus, and the dropdown opened
+	 * again on top of itself - now querying the value just written, so it listed
+	 * only that folder and its descendants and nothing else could be reached.
+	 * Picking anything took two goes, and picking anything outside took none.
+	 *
+	 * So: fill the field, close, and drop focus *before* anything touches the
+	 * file. A row that re-renders unfocused has nothing to reopen.
+	 */
 	override selectSuggestion(folder: string): void {
+		this.setValue(folder);
 		this.close();
+		this.element.blur();
 		this.onPick(folder);
 	}
 }
