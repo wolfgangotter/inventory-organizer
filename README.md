@@ -103,6 +103,31 @@ written into the generated Bases, and there a space ends the identifier while a
 hyphen reads as subtraction — `note.item-image` resolves to `note.item` minus
 `image` and the view silently shows nothing.
 
+### Where new notes go
+
+`item_folder` and `container_folder` on the inventory root decide where its
+items and containers are created. **Create inventory** pre-fills both with the
+folder the inventory itself landed in, so a `Films` inventory created in `Films`
+keeps everything together without you touching anything.
+
+```yaml
+type: inventory
+item_folder: Films/Individual Movies
+container_folder: Films/Genres
+```
+
+- **Leave a key out and new notes land next to the inventory note.** Deleting
+  `container_folder` does not mean "the vault root" — it means the folder the
+  inventory itself sits in. That is also the fallback for a value the plugin
+  cannot use.
+- **Paths are vault-absolute**, not relative to the inventory: `Films/Genres`,
+  never `./Genres` or `../Genres`. Leading `..` segments are dropped rather than
+  followed, so an inventory can never write above the vault.
+- **Missing folders are created**, intermediate levels included.
+- **Changing a folder only affects notes created afterwards.** Nothing already
+  written moves. Moving those yourself in the file explorer is safe — every link
+  between them is a wikilink, so Obsidian rewrites them all.
+
 ### Your own properties
 
 The table above is what the plugin needs. Anything else your inventory should

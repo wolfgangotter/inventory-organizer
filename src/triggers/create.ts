@@ -1,18 +1,13 @@
 import { Notice, TFile } from 'obsidian';
 import { newContainer, newInventory, newItem } from '../core/create';
 import { newId } from '../core/ids';
+import { folderOf, memberFolder } from '../core/naming';
 import { orderByRecent } from '../core/recent';
 import type { InventoryConfig, InventoryNote } from '../core/schema';
 import { ChoiceModal, noteChoices, type Choice } from '../ui/choice-modal';
 import { NamePromptModal } from '../ui/name-prompt';
 import { resolveInventory } from './context';
 import type InventoryOrganizerPlugin from '../main';
-
-/** Folder of a note, or null for the vault root. */
-function folderOf(path: string): string | null {
-	const folder = path.split('/').slice(0, -1).join('/');
-	return folder || null;
-}
 
 /**
  * A new inventory lands beside the note you were looking at, and adopts that
@@ -45,7 +40,7 @@ export function startCreateInventory(plugin: InventoryOrganizerPlugin, active: T
 export function startCreateContainer(plugin: InventoryOrganizerPlugin, active: TFile | null): void {
 	resolveInventory(plugin, active, (inventory) => {
 		const config = plugin.index.configFor(inventory.ref.path);
-		const folder = config.containerFolder ?? folderOf(inventory.ref.path);
+		const folder = memberFolder(config.containerFolder, inventory.ref.path);
 
 		new NamePromptModal(plugin.app, {
 			title: `New container in ${inventory.ref.basename}`,
@@ -68,7 +63,7 @@ export function startCreateContainer(plugin: InventoryOrganizerPlugin, active: T
 export function startCreateItem(plugin: InventoryOrganizerPlugin, active: TFile | null): void {
 	resolveInventory(plugin, active, (inventory) => {
 		const config = plugin.index.configFor(inventory.ref.path);
-		const folder = config.itemFolder ?? folderOf(inventory.ref.path);
+		const folder = memberFolder(config.itemFolder, inventory.ref.path);
 
 		// Creating an item while looking at a container means putting it in that
 		// container. Asking again would be a question with an obvious answer.
